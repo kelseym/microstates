@@ -18,7 +18,7 @@ function fh = PlotMicrostateTemplate(microstateTemplate, inputSensorLabels, layo
   axis off;
   abc = caxis;
   caxis([-1 1]*abc(2));
-  title(figureTitle);
+  title(figureTitle,'Interpreter','none');
 
 end
 

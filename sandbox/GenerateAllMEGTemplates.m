@@ -3,13 +3,13 @@ clear;
 
 
 baseDir = '/Users/Kelsey/Projects/EON/MEG 20 subjects/hcp_microstate_data_restin/';
+%outputDir = ;
 numMicrostates = 4;
 
 files = dir([baseDir '*.mat']);
 for filei=1:length(files)
-  fileName = [baseDir files(filei).name]
-  scanLabel = files(filei).name;
-  
+  fileName = [baseDir files(filei).name];
+  [~, scanLabel, ~] = fileparts(fileName);
   
   % select and open preprocessed HCP MEG data file
   load(fileName, 'data');
@@ -41,11 +41,9 @@ for filei=1:length(files)
 
 
   %% Plot Template Maps
-  for i=1:numMicrostates
-      cfg = [];
-      cfg.layout = '4D248.mat';
-      lay = ft_prepare_layout(cfg);
-      fh = PlotMicrostateTemplate(microstateTemplates(i,:), data.label, lay, sprintf('%s T%i',scanLabel, i));
-  end
+  cfg = [];
+  cfg.layout = '4D248.mat';
+  lay = ft_prepare_layout(cfg);
+  fh = PlotMicrostateTemplateSet(microstateTemplates, data.label, lay, scanLabel);
 
 end

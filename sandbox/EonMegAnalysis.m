@@ -7,6 +7,7 @@ fileName = '/Users/Kelsey/Projects/EON/MEG 20 subjects/hcp_microstate_data_resti
 
 % select and open preprocessed HCP MEG data file
 load(fileName, 'data');
+[~, scanLabel, ~] = fileparts(fileName);
 
 % band filter preprocess
 cfg = [];
@@ -38,12 +39,10 @@ microstateTemplates = ExtractMicrostateTemplates(cfg);
 
 
 %% Plot Template Maps
-for i=1:numMicrostates
-    cfg = [];
-    cfg.layout = '4D248.mat';
-    lay = ft_prepare_layout(cfg);
-    fh = PlotMicrostateTemplate(microstateTemplates(i,:), data.label, lay, sprintf('Microstate Template %i', i));
-end
+cfg = [];
+cfg.layout = '4D248.mat';
+lay = ft_prepare_layout(cfg);
+fh = PlotMicrostateTemplateSet(microstateTemplates, data.label, lay, scanLabel);
 
 %% partition data into N second (non-)overlaping trials
 cfg = [];
@@ -68,5 +67,12 @@ cfg.features = {'meanduration','stdduration','gfppeakrate','stdgfppeaks'};
 for i=1:length(dataStructs)
   dataStructs{i} = MeasureFeatures(cfg, dataStructs{i});
 end
+
+%% Plot microstate features
+for i=1:length(dataStructs)
+  data = dataStructs{i};
+  PlotFeatureXY(data, 'meanduration', 'stdduration');
+end
+
 
 
