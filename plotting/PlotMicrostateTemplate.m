@@ -12,7 +12,7 @@ function fh = PlotMicrostateTemplate(microstateTemplate, inputSensorLabels, layo
   [a,b] = match_str(layout.label, inputSensorLabels);
   fh = figure; hold on;
   layout.label{end-1} = '';
-  ft_plot_lay(layout, 'box', 'off');
+  ft_plot_lay(layout, 'box', 'off', 'label', 'no');
   ft_plot_topo(layout.pos(a,1),layout.pos(a,2),microstateTemplate(b),'gridscale',150,'outline',layout.outline,'mask',layout.mask,'interpmethod','nearest');
   axis([-0.6 0.6 -0.6 0.6]);
   axis off;
