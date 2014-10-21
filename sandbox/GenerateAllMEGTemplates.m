@@ -2,8 +2,8 @@
 clear;
 
 
-baseDir = '/Users/Kelsey/Projects/EON/MEG 20 subjects/hcp_microstate_data_restin/';
-%outputDir = ;
+baseDir = GetLocalDataDirectory();
+outputDir = GetLocalOutputDirectory();
 numMicrostates = 4;
 
 files = dir([baseDir '*.mat']);

@@ -2,7 +2,7 @@
 clear;
 
 numMicrostates = 4;
-fileName = '/Users/Kelsey/Projects/EON/MEG 20 subjects/hcp_microstate_data_restin/105923_MEG_3-Restin_rmegpreproc.mat';
+fileName = GetLocalDataFile();
 
 
 % select and open preprocessed HCP MEG data file
