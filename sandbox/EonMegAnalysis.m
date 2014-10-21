@@ -71,7 +71,12 @@ end
 %% Plot microstate features
 for i=1:length(dataStructs)
   data = dataStructs{i};
-  PlotFeatureXY(data, 'meanduration', 'stdduration');
+  fh = PlotFeatureXY(data, 'meanduration', 'stdduration','Microstate Features');
+end
+
+for i=1:length(dataStructs)
+  data = dataStructs{i};
+  fh = PlotFeatureXY(data, 'gfppeakrate','stdgfppeaks','Microstate Features');
 end
 
 
