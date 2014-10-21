@@ -20,9 +20,6 @@ cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
 data = ft_preprocessing(cfg, data);
 
-% concatenate time series data end-to-end in a single trial
-data = ConcatenateTrials(data);
-
 %% Plot time series
 PlotTimeSeries(data, 0, 2, '');
 
@@ -35,6 +32,7 @@ dataStructs{1} = data;
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = dataStructs;
+cfg.clustertrainingstyle = 'global';
 microstateTemplates = ExtractMicrostateTemplates(cfg);
 
 
@@ -42,19 +40,22 @@ microstateTemplates = ExtractMicrostateTemplates(cfg);
 cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
-fh = PlotMicrostateTemplateSet(microstateTemplates, data.label, lay, scanLabel);
+fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}, data.label, lay, scanLabel);
 
 %% partition data into N second (non-)overlaping trials
 cfg = [];
 cfg.length=10;
 cfg.overlap=0.0;
 for i=1:length(dataStructs)
+  % Concatenate time series data end-to-end in a single trial
+  dataStructs{i} = ConcatenateTrials(dataStructs{i});
+  % Redistribute into new trial lengths
   dataStructs{i} = ft_redefinetrial(cfg, dataStructs{i});
 end
   
 %% find microstate sequence in electroneurophys data
 cfg = [];
-cfg.microstateTemplates = microstateTemplates;
+cfg.microstateTemplates = microstateTemplates{1}{1};
 for i=1:length(dataStructs)
   dataStructs{i} = AssignMicrostateLabels(cfg, dataStructs{i});
 end

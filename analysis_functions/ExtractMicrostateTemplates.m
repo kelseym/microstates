@@ -1,54 +1,79 @@
 %% Extract microstate templates
 %  Given one or more data structure and the number of desired template maps,
-%  use data at GFP peaks to find cluster centers from concatonated data
-%
-%  cfg.numtemplates = value, explain the value here (default = something)
-%  cfg.datastructs = data or {data1, data2, ...}
+%  use data at GFP peaks to find cluster centers from concatenated data
+
+%  
+%  Input:
+%  cfg.numtemplates = intValue, integer value denoting the number of clusters to find
+%  cfg.datastructs = data or {data1, data2, ...} where data are fieldtrip style data structures
+%  cfg.clustertrainingstyle = 'global' (default) or 'local' or 'trial'
+          % Which data should be used to form clusters: 
+          % global - concatenate all data to determin cluster centers
+          % local - concatenate all trials in each data structure (data file) to find unique cluster centers for each
+          % trial - find unique cluster centers for each trial individually
 
 
-function microstateTemplates = ExtractMicrostateTemplates(cfg)
+function globalTemplates = ExtractMicrostateTemplates(cfg)
 
   % ensure that the required options are present
   cfg = ft_checkconfig(cfg, 'required', {'numtemplates'});
   cfg = ft_checkconfig(cfg, 'required', {'datastructs'});
-
+  
   % ensure that the options are valid
   cfg = ft_checkopt(cfg, 'numtemplates', 'double');
+  cfg = ft_checkopt(cfg, 'clustertrainingstyle', 'char', {'global', 'local', 'trial'});
 
   % get the options
   numTemplates = ft_getopt(cfg, 'numtemplates');
   dataStructs = ft_getopt(cfg, 'datastructs');
+  clusterTrainingStyle = ft_getopt(cfg, 'clustertrainingstyle', 'global');
 
-  % determine if dataStructs is a single data structure or a cell array of data structures
-  % concatonate all timecourse data
-  dataMatrix = [];
+  % if dataStruct input is a single fieldtrip data structure, pack it in a cell element to unify some of the processing below
   if isstruct(dataStructs)
-    for i=1:length(dataStructs.trial);
-      dataMatrix = cat(2, dataMatrix, dataStructs.trial{i});
+    dataStructs = {dataStructs};
+  end
+  
+  % concatenate trials if finding clusters using global or local option
+  if strcmp(clusterTrainingStyle, 'global') || strcmp(clusterTrainingStyle, 'local')
+    for j=length(dataStructs)
+      dataStructs{j} = ConcatenateTrials(dataStructs{j});
     end
-  elseif iscell(dataStructs) && length(dataStructs)>=1 && isstruct(dataStructs{1})
+  end
+    
+  % Concatenate input data structures if using global option
+  if strcmp(clusterTrainingStyle, 'global')
+    dataMatrix = [];
     for j=length(dataStructs)
       for i=1:length(dataStructs{j}.trial);
         dataMatrix = cat(2, dataMatrix, dataStructs{j}.trial{i});
       end
     end
+    dataStructs = [];
+    dataStructs{1}.trial{1} = dataMatrix;
+  end
+
+  for strctIndx=1:length(dataStructs)
+    for trlIndx=1:length(dataStructs{strctIndx}.trial)
+      dataMatrix = dataStructs{strctIndx}.trial{trlIndx};
+      % find gfp peaks
+      [~, gfpPkLocs] = LocateGfpPeaks(dataMatrix);
+      % sample sensor data at gfp peaks
+      trainingMaps = dataMatrix(:,gfpPkLocs)';
+      % cluster analysis
+      distTree = pdist(trainingMaps, 'correlation');
+      clustTree = linkage(distTree, 'average');
+      % choose N clusters, assign sample points to 1 of N microstates
+      sampleMapMembership = cluster(clustTree,'maxclust',numTemplates);
+      % find cluster centroids
+      trialTemplates = zeros(numTemplates, size(trainingMaps,2));
+      for i=1:numTemplates
+          meanMap = mean(trainingMaps(sampleMapMembership == i, :), 1);
+          trialTemplates(i, :) = meanMap(:);
+      end
+      localTemplates{trlIndx} = trialTemplates;
+    end
+    globalTemplates{strctIndx} = localTemplates;
   end
   
-  % find gfp peaks
-  [~, gfpPkLocs] = LocateGfpPeaks(dataMatrix);
-  % sample sensor data at gfp peaks
-  trainingMaps = dataMatrix(:,gfpPkLocs)';
-  % cluster analysis
-  distTree = pdist(trainingMaps, 'correlation');
-  clustTree = linkage(distTree, 'average');
-  % choose N clusters, assign sample points to 1 of N microstates
-  sampleMapMembership = cluster(clustTree,'maxclust',numTemplates);
-  % find cluster centroids
-  microstateTemplates = zeros(numTemplates, size(trainingMaps,2));
-  for i=1:numTemplates
-      meanMap = mean(trainingMaps(sampleMapMembership == i, :), 1);
-      microstateTemplates(i, :) = meanMap(:);
-  end
   
-  
-end  
+end

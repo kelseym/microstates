@@ -37,6 +37,7 @@ for filei=1:length(files)
   cfg = [];
   cfg.numtemplates = numMicrostates;
   cfg.datastructs = dataStructs;
+  cfg.clustertrainingstyle = 'global';
   microstateTemplates = ExtractMicrostateTemplates(cfg);
 
 
@@ -44,6 +45,6 @@ for filei=1:length(files)
   cfg = [];
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
-  fh = PlotMicrostateTemplateSet(microstateTemplates, data.label, lay, scanLabel);
+  fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}, data.label, lay, scanLabel);
 
 end
