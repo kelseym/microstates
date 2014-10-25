@@ -30,47 +30,43 @@ cfg.datastructs = dataStructs;
 cfg.clustertrainingstyle = 'local';
 localMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 
-%% Plot Template Maps
-cfg = [];
-cfg.layout = '4D248.mat';
-lay = ft_prepare_layout(cfg);
-fh = PlotMicrostateTemplateSet(localMicrostateTemplates{1}{1}, data.label, lay, ['Local Templates ' scanLabel]);
+%% Test stability of clusters when data is partitioned into N second chunks
+continuousData = ConcatenateTrials(data);
+for trialLength=[1,2,4,8,16,32,64,128,256]
+  % Compose N second trials
+  cfg = [];
+  cfg.length=trialLength;
+  cfg.overlap=0.0;
+  nSecTrialData = ft_redefinetrial(cfg, continuousData);
 
+  % Find trial cluster centers
+  cfg = [];
+  cfg.numtemplates = numMicrostates;
+  cfg.datastructs = {nSecTrialData};
+  cfg.clustertrainingstyle = 'trial';
+  trialMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 
-% Find trial cluster centers (2 second default for HCP data) 
-cfg = [];
-cfg.numtemplates = numMicrostates;
-cfg.datastructs = dataStructs;
-cfg.clustertrainingstyle = 'trial';
-trialMicrostateTemplates = ExtractMicrostateTemplates(cfg);
-
-% Plot template maps for each 2sec trial
-for trlIndx=1:length(trialMicrostateTemplates{1})
-  fh = PlotMicrostateTemplateSet(trialMicrostateTemplates{1}{trlIndx}, data.label, lay, sprintf('Trial %i Templates %s', i, scanLabel));
-  drawnow;
-  frames(trlIndx) = getframe(fh);
-  close(fh);
-end
-
-% For each 2sec trial, find the distance to the corresponding local cluster
-templateDistance = zeros(numMicrostates, length(trialMicrostateTemplates{1}));
-for trlIndx=1:length(trialMicrostateTemplates{1})
-  trialTemplate = trialMicrostateTemplates{1}{trlIndx};
-  for msIndx=1:numMicrostates
-    templateDistance(msIndx,trlIndx) = norm(trialTemplate(msIndx,:) - localMicrostateTemplates{1}{1}(msIndx,:));
+  % For each N sec trial, find the distance to the corresponding local cluster
+  templateDistance = zeros(numMicrostates, length(trialMicrostateTemplates{1}));
+  for trlIndx=1:length(trialMicrostateTemplates{1})
+    trialTemplate = trialMicrostateTemplates{1}{trlIndx};
+    for msIndx=1:numMicrostates
+      templateDistance(msIndx,trlIndx) = norm(trialTemplate(msIndx,:) - localMicrostateTemplates{1}{1}(msIndx,:));
+    end
   end
-end
 
-% Plot global cluster centers at integers. Normalize, then plot trial cluster distances to global center
-mx = max(max(templateDistance));
-mn = min(min(templateDistance));
-normTemplateDistance = (templateDistance-mn)/mx;
-figure;
-hold on;
-for i=1:numMicrostates
-  tmpDist = normTemplateDistance(i,:)+i;
-  plot(tmpDist);
+  % Plot global cluster centers at integers. Normalize, then plot trial cluster distances to global center
+  mx = max(max(templateDistance));
+  mn = min(min(templateDistance));
+  normTemplateDistance = (templateDistance-mn)/mx;
+  figure;
+  title(sprintf('%i Second Trial Template Map Stability',trialLength)); 
+  hold on;
+  for i=1:numMicrostates
+    tmpDist = normTemplateDistance(i,:)+i;
+    plot(tmpDist);
+  end
+  hold off;
 end
-  
   
   
