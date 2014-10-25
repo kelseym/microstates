@@ -2,7 +2,7 @@
 
 clear;
 
-numMicrostates = 4;
+numMicrostates = 3;
 fileName = GetLocalDataFile();
 
 
@@ -30,6 +30,12 @@ cfg.datastructs = dataStructs;
 cfg.clustertrainingstyle = 'local';
 localMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 
+%% Plot Template Maps
+cfg = [];
+cfg.layout = '4D248.mat';
+lay = ft_prepare_layout(cfg);
+fh = PlotMicrostateTemplateSet(localMicrostateTemplates{1}{1}, data.label, lay, ['Local Templates ' scanLabel]);
+
 
 % Find trial cluster centers (2 second default for HCP data) 
 cfg = [];
@@ -37,6 +43,14 @@ cfg.numtemplates = numMicrostates;
 cfg.datastructs = dataStructs;
 cfg.clustertrainingstyle = 'trial';
 trialMicrostateTemplates = ExtractMicrostateTemplates(cfg);
+
+% Plot template maps for each 2sec trial
+for trlIndx=1:length(trialMicrostateTemplates{1})
+  fh = PlotMicrostateTemplateSet(trialMicrostateTemplates{1}{trlIndx}, data.label, lay, sprintf('Trial %i Templates %s', i, scanLabel));
+  drawnow;
+  frames(trlIndx) = getframe(fh);
+  close(fh);
+end
 
 % For each 2sec trial, find the distance to the corresponding local cluster
 templateDistance = zeros(numMicrostates, length(trialMicrostateTemplates{1}));
