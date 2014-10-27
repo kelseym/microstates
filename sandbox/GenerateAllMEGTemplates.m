@@ -4,7 +4,10 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 outputDir = GetLocalOutputDirectory();
-numMicrostates = 4;
+numMicrostates = 7;
+
+outputDir = [outputDir filesep sprintf('%i microstates',numMicrostates)];
+mkdir(outputDir);
 
 files = dir([baseDir '*.mat']);
 for filei=1:length(files)
@@ -47,4 +50,9 @@ for filei=1:length(files)
   lay = ft_prepare_layout(cfg);
   fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}, data.label, lay, scanLabel);
 
+  %% Save output file
+  outputFileName = sprintf('%s_%i_templates', scanLabel, numMicrostates);
+  saveas(fh, [outputDir outputFileName], 'png');
+  close(fh);
+  pause(1);
 end
