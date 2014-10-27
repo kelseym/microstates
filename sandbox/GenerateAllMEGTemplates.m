@@ -6,7 +6,7 @@ baseDir = GetLocalDataDirectory();
 outputDir = GetLocalOutputDirectory();
 numMicrostates = 7;
 
-outputDir = [outputDir filesep sprintf('%i microstates',numMicrostates)];
+outputDir = [outputDir sprintf('%i microstates',numMicrostates)];
 mkdir(outputDir);
 
 files = dir([baseDir '*.mat']);
@@ -52,7 +52,7 @@ for filei=1:length(files)
 
   %% Save output file
   outputFileName = sprintf('%s_%i_templates', scanLabel, numMicrostates);
-  saveas(fh, [outputDir outputFileName], 'png');
+  saveas(fh, [outputDir filesep outputFileName], 'png');
   close(fh);
   pause(1);
 end
