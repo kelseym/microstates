@@ -69,6 +69,13 @@ for i=1:length(dataStructs)
   dataStructs{i} = MeasureFeatures(cfg, dataStructs{i});
 end
 
+%% Plot microstate sequence
+cfg = [];
+cfg.trialindex = 1;
+cfg.starttime = 1;
+cfg.endtime = 4;
+PlotMicrostateSequence(dataStructs{1}, cfg);
+
 %% Plot microstate features
 for i=1:length(dataStructs)
   data = dataStructs{i};
