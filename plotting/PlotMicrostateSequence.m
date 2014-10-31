@@ -38,7 +38,7 @@ function fh = PlotMicrostateSequence(data, cfg)
   % Compute samples to be plotted (start at index no less than one)
   pltSmpls = floor(max(1,startTime*data.fsample)):ceil(min(endTime*data.fsample,length(data.trial{trialIndex})));
 
-  figure;
+  fh = figure;
   lineColors = lines;
   hold on;
   [~, tmplSwitchIdx] = find(diff(data.microstateIndices{trialIndex}(pltSmpls)));

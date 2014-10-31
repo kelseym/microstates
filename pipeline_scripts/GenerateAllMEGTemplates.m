@@ -28,8 +28,12 @@ for filei=1:length(files)
   cfg.bpfreq = [1.0 40.0];
   data = ft_preprocessing(cfg, data);
 
-  % concatenate time series data end-to-end in a single trial
+  % Reshape data into N second trials to define windows for feature exraction
   data = ConcatenateTrials(data);
+  cfg = [];
+  cfg.length = 15;
+  cfg.overlap = 0.0;
+  data = ft_redefinetrial(cfg, data);
 
   %% extract N microstate templates
 
@@ -62,4 +66,40 @@ for filei=1:length(files)
   for i=1:length(dataStructs)
     dataStructs{i} = AssignMicrostateLabels(cfg, dataStructs{i});
   end
+  
+  %% Plot microstate sequence: time in sec, visualize small segment of full microstate seq
+  cfg = [];
+  cfg.trialindex = 1;
+  cfg.starttime = 1;
+  cfg.endtime = 5;
+  fh = PlotMicrostateSequence(dataStructs{1}, cfg);
+  outputFileName = sprintf('%s_%i_templates_microstateSequence', scanLabel, numMicrostates);
+  saveas(fh, [outputDir filesep outputFileName], 'png');
+  close(fh);
+  pause(1);
+
+  
+  %% extract features from microstate sequence
+  cfg = [];
+  cfg.features = {'meanduration','stdduration','gfppeakrate','stdgfppeaks'};
+  for i=1:length(dataStructs)
+    dataStructs{i} = MeasureFeatures(cfg, dataStructs{i});
+  end
+  
+  %% Plot microstate features
+  data = dataStructs{1};
+  fh = PlotFeatureXY(data, 'meanduration', 'stdduration','Microstate Features');
+  outputFileName = sprintf('%s_%i_templates_duration', scanLabel, numMicrostates);
+  saveas(fh, [outputDir filesep outputFileName], 'png');
+  close(fh);
+  pause(1);
+
+
+  data = dataStructs{1};
+  fh = PlotFeatureXY(data, 'gfppeakrate','stdgfppeaks','Microstate Features');
+  outputFileName = sprintf('%s_%i_templates_gfppeaks', scanLabel, numMicrostates);
+  saveas(fh, [outputDir filesep outputFileName], 'png');
+  close(fh);
+  pause(1);
+
 end
