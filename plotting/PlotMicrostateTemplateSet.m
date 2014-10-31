@@ -15,9 +15,12 @@ function fh = PlotMicrostateTemplateSet(microstateTemplates, inputSensorLabels, 
   fh = figure('name', figureTitle);
   hold on;
   numSubPlots = size(microstateTemplates,1);
+  numRows = 1;
+  if numSubPlots > 4
+    numRows = ceil(numSubPlots/4);
   layout.label{end-1} = '';
   for ti=1:size(microstateTemplates,1)
-    subplot(1,numSubPlots,ti);
+    subplot(numRows,4,ti);
     microstateTemplate = microstateTemplates(ti,:);
     ft_plot_lay(layout, 'box', 'off', 'label', 'no', 'point', 'no');
     ft_plot_topo(layout.pos(a,1),layout.pos(a,2),microstateTemplate(b),'gridscale',150,'outline',layout.outline,'mask',layout.mask,'interpmethod','nearest');
