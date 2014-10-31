@@ -4,7 +4,7 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 outputDir = GetLocalOutputDirectory();
-numMicrostates = 7;
+numMicrostates = 5;
 
 outputDir = [outputDir sprintf('%i microstates',numMicrostates)];
 mkdir(outputDir);
@@ -55,4 +55,11 @@ for filei=1:length(files)
   saveas(fh, [outputDir filesep outputFileName], 'png');
   close(fh);
   pause(1);
+  
+  %% find microstate sequence in electroneurophys data
+  cfg = [];
+  cfg.microstateTemplates = microstateTemplates{1}{1};
+  for i=1:length(dataStructs)
+    dataStructs{i} = AssignMicrostateLabels(cfg, dataStructs{i});
+  end
 end
