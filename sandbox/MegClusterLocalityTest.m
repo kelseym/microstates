@@ -13,6 +13,7 @@ load(fileName, 'data');
 % dataStructs contains a cell array of fieldtrip data strutures - which
 % will be concatenated to derive microstate templates - just one for now
 dataStructs{1} = data;
+clear data;
 
 % band filter preprocess
 cfg = [];
@@ -21,7 +22,7 @@ cfg.demean = 'yes';
 cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
-data = ft_preprocessing(cfg, data);
+dataStructs{1} = ft_preprocessing(cfg, dataStructs{1});
 
 % Find local cluster centers (using all data in single file)
 cfg = [];
