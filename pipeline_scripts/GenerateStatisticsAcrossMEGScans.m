@@ -4,6 +4,7 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 baseOutputDir = GetLocalOutputDirectory();
+outputFileName = 'microstateDuration.csv';
 numMicrostatesToTest = [2,3,4,5,6,7,8,9,10];
 
 files = dir([baseDir '*.mat']);
@@ -11,6 +12,8 @@ meanDurationByScan = {};
 
 for filei=1:length(files)
 
+  fprintf('### Processing file %i of %i ###', filei, length(files));
+  
   fileName = [baseDir files(filei).name];
   [~, scanLabel, ~] = fileparts(fileName);
   
@@ -37,10 +40,8 @@ for filei=1:length(files)
 
 
   %% extract N microstate templates
-  for j=1:length(numMicrostatesToTest)
-    numMicrostates = numMicrostatesToTest(j);
-    outputDir = [baseOutputDir sprintf('%i microstates',numMicrostates)];
-    mkdir(outputDir);
+  for numMicrostatesIndx=1:length(numMicrostatesToTest)
+    numMicrostates = numMicrostatesToTest(numMicrostatesIndx);
 
     cfg = [];
     cfg.numtemplates = numMicrostates;
@@ -60,15 +61,30 @@ for filei=1:length(files)
     data = MeasureFeatures(cfg, data);
 
     % store mean duration array and scan label in cell array
-    meanDurationByScan{end+1} = {scanLabel, data.featurevalues{1}};
+    meanDurationByScan{end+1} = {scanLabel, numMicrostatesIndx, data.featurevalues{1}};
   end
   
 end
 
 %% Write meanDurationByScan to csv file
 
+% open file
+outputFileID = fopen([baseOutputDir filesep outputFileName], 'w');
 
-
-
-
-
+fprintf(outputFileID,'%s,%s,%s', 'ScanID','NumMicrostates','MeanDuration');
+fprintf(outputFileID,'\n');
+% for every scan
+for scanIdx=1:length(meanDurationByScan)
+  fprintf(outputFileID, '%s', meanDurationByScan{scanIdx}{1});
+  fprintf(outputFileID, ',%i', meanDurationByScan{scanIdx}{2});
+  featureValues =  meanDurationByScan{scanIdx}{3};
+  fprintf(outputFileID, ',%f', mean(featureValues));
+  % for every feature measurement in this scan
+  for featurei=1:length(featureValues)
+    fprintf(outputFileID,',%f',featureValues(featurei));
+  end
+  fprintf(outputFileID,'\n');
+end
+  
+% close file
+fclose(outputFileID);
