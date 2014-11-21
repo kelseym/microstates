@@ -2,11 +2,12 @@
 clear;
 
 numMicrostates = 4;
-fileName = '/Users/Kelsey/Projects/EON/MEG 20 subjects/hcp_microstate_data_restin/105923_MEG_3-Restin_rmegpreproc.mat';
+fileName = GetLocalDataFile();
 
 
 % select and open preprocessed HCP MEG data file
 load(fileName, 'data');
+[~, scanLabel, ~] = fileparts(fileName);
 
 % band filter preprocess
 cfg = [];
@@ -18,9 +19,6 @@ cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
 data = ft_preprocessing(cfg, data);
-
-% concatenate time series data end-to-end in a single trial
-data = ConcatenateTrials(data);
 
 %% Plot time series
 PlotTimeSeries(data, 0, 2, '');
@@ -34,28 +32,30 @@ dataStructs{1} = data;
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = dataStructs;
+cfg.clustertrainingstyle = 'global';
 microstateTemplates = ExtractMicrostateTemplates(cfg);
 
 
 %% Plot Template Maps
-for i=1:numMicrostates
-    cfg = [];
-    cfg.layout = '4D248.mat';
-    lay = ft_prepare_layout(cfg);
-    fh = PlotMicrostateTemplate(microstateTemplates(i,:), data.label, lay, sprintf('Microstate Template %i', i));
-end
+cfg = [];
+cfg.layout = '4D248.mat';
+lay = ft_prepare_layout(cfg);
+fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}, data.label, lay, scanLabel);
 
 %% partition data into N second (non-)overlaping trials
 cfg = [];
 cfg.length=10;
 cfg.overlap=0.0;
 for i=1:length(dataStructs)
+  % Concatenate time series data end-to-end in a single trial
+  dataStructs{i} = ConcatenateTrials(dataStructs{i});
+  % Redistribute into new trial lengths
   dataStructs{i} = ft_redefinetrial(cfg, dataStructs{i});
 end
   
 %% find microstate sequence in electroneurophys data
 cfg = [];
-cfg.microstateTemplates = microstateTemplates;
+cfg.microstateTemplates = microstateTemplates{1}{1};
 for i=1:length(dataStructs)
   dataStructs{i} = AssignMicrostateLabels(cfg, dataStructs{i});
 end
@@ -68,5 +68,24 @@ cfg.features = {'meanduration','stdduration','gfppeakrate','stdgfppeaks'};
 for i=1:length(dataStructs)
   dataStructs{i} = MeasureFeatures(cfg, dataStructs{i});
 end
+
+%% Plot microstate sequence
+cfg = [];
+cfg.trialindex = 1;
+cfg.starttime = 1;
+cfg.endtime = 4;
+PlotMicrostateSequence(dataStructs{1}, cfg);
+
+%% Plot microstate features
+for i=1:length(dataStructs)
+  data = dataStructs{i};
+  fh = PlotFeatureXY(data, 'meanduration', 'stdduration','Microstate Features');
+end
+
+for i=1:length(dataStructs)
+  data = dataStructs{i};
+  fh = PlotFeatureXY(data, 'gfppeakrate','stdgfppeaks','Microstate Features');
+end
+
 
 

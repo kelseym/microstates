@@ -3,16 +3,8 @@
 
 
 function files = GetFileNames()
-  % specify data directory based on compter host name
-  hostName = char(getHostName(java.net.InetAddress.getLocalHost));
-  
-  baseDirectory = './';
-  if ~isempty(strfind(hostName, 'Mac'))
-    baseDirectory = '/Users/Kelsey/Projects/McDonnell/';
-  elseif ~isempty(strfind(hostName, 'Sputnik1'))
-    baseDirectory = 'D:/Projects/McDonnell/';
-  end
-  
+
+  baseDirectory = GetLocalDataDirectory();
 
   files = {};
   % McD03 Wake Grid info

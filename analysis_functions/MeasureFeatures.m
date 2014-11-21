@@ -39,7 +39,7 @@ function meanMsDuration = MeanDuration(data)
   for trli=1:length(data.microstateIndices)
     tmpltIndcs = data.microstateIndices{trli};
     [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
-    meanMsDuration{trli} = NaN;
+    meanMsDuration(trli) = NaN;
     if numel(tmplSwtchIdx) >  1 
       % discard the leading and trailing template map runs, since it is unlikely that we are capturing the full run
       tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
@@ -48,7 +48,7 @@ function meanMsDuration = MeanDuration(data)
       tmplSwtchIdx = [0 tmplSwtchIdx length(tmpltIndcs)];
       % find average length of template match
       msDuration = diff(tmplSwtchIdx);
-      meanMsDuration{trli} = mean(msDuration)/data.fsample;
+      meanMsDuration(trli) = mean(msDuration)/data.fsample;
     end
   end
 end
@@ -58,7 +58,7 @@ function stdDevDuration = StdDevDuration(data)
   for trli=1:length(data.microstateIndices)
     tmpltIndcs = data.microstateIndices{trli};
     [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
-    stdDevDuration{trli} = NaN;
+    stdDevDuration(trli) = NaN;
     if numel(tmplSwtchIdx) >  1 
       % discard the leading and trailing template map runs, since it is unlikely that we are capturing the full run
       tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
@@ -67,7 +67,7 @@ function stdDevDuration = StdDevDuration(data)
       tmplSwtchIdx = [0 tmplSwtchIdx length(tmpltIndcs)];
       % find average length of template match
       msDuration = diff(tmplSwtchIdx);
-      stdDevDuration{trli} = std(msDuration/data.fsample);
+      stdDevDuration(trli) = std(msDuration/data.fsample);
     end
   end
 end
@@ -81,7 +81,7 @@ function gfpPeakRate = GfpPeakRate(data)
     [~, peakLocs] = findpeaks(gfp,'MINPEAKDISTANCE',3);
     numPeaks = length(peakLocs);
     secondsInTrial = length(gfp)/data.fsample;
-    gfpPeakRate{trli} = numPeaks/secondsInTrial;
+    gfpPeakRate(trli) = numPeaks/secondsInTrial;
   end
 end
 
@@ -93,7 +93,7 @@ function stdDevGfpPeaks = StdDevGfpPeaks(data)
     % Find local maxima
     [~, peakLocs] = findpeaks(gfp,'MINPEAKDISTANCE',3);
     secondsBetweenPeaks = diff(peakLocs/data.fsample);
-    stdDevGfpPeaks{trli} = std(secondsBetweenPeaks);
+    stdDevGfpPeaks(trli) = std(secondsBetweenPeaks);
     
     
   end
