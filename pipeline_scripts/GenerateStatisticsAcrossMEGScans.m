@@ -4,8 +4,8 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 baseOutputDir = GetLocalOutputDirectory();
-outputFileName = 'microstateDuration.csv';
-numMicrostatesToTest = [2,3,4,5,6,7,8,9,10];
+outputFileName = 'microstateDuration_2-10.csv';
+numMicrostatesToTest = [2,10];
 
 files = dir([baseDir '*.mat']);
 meanDurationByScan = {};
@@ -61,7 +61,7 @@ for filei=1:length(files)
     data = MeasureFeatures(cfg, data);
 
     % store mean duration array and scan label in cell array
-    meanDurationByScan{end+1} = {scanLabel, numMicrostatesIndx, data.featurevalues{1}};
+    meanDurationByScan{end+1} = {scanLabel, numMicrostatesToTest(numMicrostatesIndx), data.featurevalues{1}};
   end
   
 end
