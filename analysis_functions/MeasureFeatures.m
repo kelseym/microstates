@@ -51,6 +51,11 @@ function meanMsDuration = MeanDuration(data)
       meanMsDuration(trli) = mean(msDuration)/data.fsample;
     end
   end
+  % Remove < 10ms (10 samples @ 1kHz)
+  lowCutoffMs = 10;
+  lowCutoffSamples = lowCutoffMs/1000*data.fsample;
+  meanMsDuration = meanMsDuration(meanMsDuration>=lowCutoffSamples);
+
 end
 
 %% Calculate the standard deviation of the continuous duration of microstates over the trial window
