@@ -26,6 +26,11 @@ cfg.datastructs = data;
 cfg.clustertrainingstyle = 'global';
 microstateTemplates = ExtractMicrostateTemplates(cfg);
 
+%% find microstate sequence in electroneurophys data
+cfg = [];
+cfg.microstateTemplates = microstateTemplates{1}{1};
+data = AssignMicrostateLabels(cfg, data);
+
 % Plot Template Maps
 cfg = [];
 cfg.layout = '4D248.mat';
@@ -40,18 +45,21 @@ cfg.grad       = data.hdr.grad;
 neighb         = ft_prepare_neighbours(cfg);
 % compute roughness
 cfg = [];
-cfg.compareto = 'self';
 cfg.clusterstatistic = 'roughness';
+cfg.microstatetemplates = microstateTemplates{1}{1};
 cfg.sensorneighbors = neighb;
-cfg.sensorlabels = data.label;
-templateRoughness = TemplateStatistics(microstateTemplates{1}{1}, cfg);
+templateRoughness = TemplateStatistics(cfg, data);
 % compute contrast
 cfg = [];
-cfg.compareto = 'self';
 cfg.clusterstatistic = 'spatialcontrast';
+cfg.microstatetemplates = microstateTemplates{1}{1};
 cfg.sensorneighbors = neighb;
-cfg.sensorlabels = data.label;
-templateContrast = TemplateStatistics(microstateTemplates{1}{1}, cfg);
+templateContrast = TemplateStatistics(cfg, data);
+% compute variance
+cfg = [];
+cfg.clusterstatistic = 'variance';
+cfg.microstatetemplates = microstateTemplates{1}{1};
+clusterVariance = TemplateStatistics(cfg, data);
 
 % Plot templates sorted by roughness (ascending)
 [~, I] = sort(templateRoughness);
@@ -66,5 +74,12 @@ cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}(I,:), data.label, lay, ['Ascending Contrast - ' scanLabel]);
+
+% Plot templates sorted by cluster variance (ascending)
+[sortedClusterVariance, I] = sort(clusterVariance);
+cfg = [];
+cfg.layout = '4D248.mat';
+lay = ft_prepare_layout(cfg);
+fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}(I,:), data.label, lay, ['Ascending Cluster Variance - ' scanLabel]);
 
 

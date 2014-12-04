@@ -1,37 +1,51 @@
 %% Microstate template cluster measure
 
-%   Measure cluster statistics such as spatial contrast or roughness (local maxima)
+%   Measure cluster statistics such as spatial contrast, roughness (local maxima) or variance
 
 %   Input:
-%   microstateTemplates = NxS matrix where each row defines microstates template over S sensors
-%   cfg.clusterstatistic = 'spatialcontrast', 'roughness' - used with cfg.compareto='self'
+%   data - required for cluster variance statistic
+%   cfg.clusterstatistic = 'spatialcontrast', 'roughness', 'variance'
+%   cfg.microstatetemplates = NxS matrix where each row defines microstates template over S sensors
+
+%   cfg.sensorneighbors = fieldtrip style neighbor structure - required for used with 'spatialcontrast'
+%   cfg.sensorlabels = fieldtrip label array (from data.label) - required for used with 'spatialcontrast'
 %   cfg.similaritymetric = 'euclidean' (default), 'correlation' - used with cfg.compareto='eachother'|'zero'|'sample'
 %   cfg.ignorepolarity = 'yes' (default), 'no'- used with cfg.compareto!='self'
 
-function statisticMatrix = TemplateStatistics(microstateTemplates, cfg)
+function statisticMatrix = TemplateStatistics(cfg, data)
+
+  % ensure that the required options are present
+  cfg = ft_checkconfig(cfg, 'required', {'clusterstatistic'});
 
   % ensure that the options are valid
-  cfg = ft_checkopt(cfg, 'clusterstatistic', 'char', {'spatialcontrast','roughness'});
-
+  cfg = ft_checkopt(cfg, 'clusterstatistic', 'char', {'spatialcontrast','roughness','variance'});
 
   % get the options
+  microstateTemplates = ft_getopt(cfg, 'microstatetemplates');
   clusterStatistic = ft_getopt(cfg, 'clusterstatistic','spatialcontrast');
+  
   sensorNeighbors = ft_getopt(cfg, 'sensorneighbors');
-  sensorLabels = ft_getopt(cfg, 'sensorlabels');
   sampleTemplate = ft_getopt(cfg, 'sampletemplate', []);
   ignorePolarity = ft_getopt(cfg, 'ignorepolarity', 'no');
 
   %% Gather statistics for each cluster independently
   if strcmp(clusterStatistic, 'spatialcontrast')
     if ~isempty(sensorNeighbors)
-      sensorContrast = ComputeSpatialContrast(microstateTemplates, sensorLabels, sensorNeighbors);
+      sensorContrast = ComputeSpatialContrast(microstateTemplates, data.label, sensorNeighbors);
       statisticMatrix = mean(sensorContrast,2);
     else
       error('Missing sensorneighbors structure');
     end
   elseif strcmp(clusterStatistic, 'roughness')
-      sensorRoughness = ComputeMeanLocalMaxima(microstateTemplates, sensorLabels, sensorNeighbors);
+      sensorRoughness = ComputeMeanLocalMaxima(microstateTemplates, data.label, sensorNeighbors);
       statisticMatrix = sensorRoughness;
+  elseif strcmp(clusterStatistic, 'variance')
+    if isfield(data, 'microstateIndices')
+      clusterVariance = ComputeClusterVariance(data);
+      statisticMatrix = clusterVariance;
+    else
+      error('data structure is missing microstateIndices field');
+    end
   else
     error('Unknown clusterstatistic option.');
   end
@@ -39,7 +53,7 @@ function statisticMatrix = TemplateStatistics(microstateTemplates, cfg)
   
 end
 
-% Return average spatial contrast for each sensor in a set of microstate template
+% Return the average spatial contrast for each sensor for each microstate template
 function sensorContrast = ComputeSpatialContrast(microstateTemplates, sensorLabels, sensorNeighbors)
   sensorContrast = zeros(size(microstateTemplates));
   for ti=1:size(microstateTemplates,1)
@@ -71,6 +85,18 @@ function meanLocalMaxima = ComputeMeanLocalMaxima(microstateTemplates, sensorLab
       end
     end
     meanLocalMaxima(ti) = maximaCount/length(sensorLabels);
+  end
+end
+
+% Return cluster compactness for each microstate template and assigned data
+function clusterVarinace = ComputeClusterVariance(data)
+  % concatenate trials in data, allowing 
+  data = ConcatenateTrials(data);
+  indices = unique(data.microstateIndices{1});
+  clusterVarinace = zeros(size(indices));
+  for i=1:length(indices)
+    microstateIndex = indices(i);
+    clusterVarinace(microstateIndex) = var(data.trial{1}(data.microstateIndices{1}==microstateIndex));
   end
 end
 
