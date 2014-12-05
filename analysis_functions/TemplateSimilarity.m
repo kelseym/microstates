@@ -2,7 +2,6 @@
 %   Measure similarity between N-dimensional templates.
 %   Optionally, compare templates to a zero array. i.e. distance to origin or sample template set
 %   Metric can be euclidean distance or correlation between templates.
-%   Default behaviour ignores polarity, options to disable this.
 
 %   Input:
 %   microstateTemplates = NxS matrix where each row defines microstates template over S sensors
