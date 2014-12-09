@@ -70,27 +70,27 @@ for msi=1:length(sortedMicrostateTemplates);
   
 end
 
-%% Use correlation to the first template set as the method to define order
-sampleTemplateSet = sortedMicrostateTemplates{1};
-corrSortedMicrostateTemplates{1} = sampleTemplateSet;
-for msi=2:length(microstateTemplates);
-  cfg = [];
-  cfg.compareto = 'sample';
-  cfg.sampletemplate = sampleTemplateSet;
-  cfg.similaritymetric = 'correlation';
-  corrToSample = TemplateSimilarity(microstateTemplates{msi}, cfg);
-  [~, corrOrder] = sort(corrToSample);
-  corrSortedMicrostateTemplates{mis} = microstateTemplates{msi}(corrOrder,:);
-end
-
-%% Plot Correlation Sorted Template Maps
-for msi=1:length(corrSortedMicrostateTemplates);
-  cfg = [];
-  cfg.layout = '4D248.mat';
-  lay = ft_prepare_layout(cfg);
-  fh = PlotMicrostateTemplateSet(corrSortedMicrostateTemplates{msi}, dataStructs{msi}.label, lay, scanLabel{msi});
-  
-end
-
+% %% Use correlation to the first template set as the method to define order
+% sampleTemplateSet = sortedMicrostateTemplates{1};
+% corrSortedMicrostateTemplates{1} = sampleTemplateSet;
+% for msi=2:length(microstateTemplates);
+%   cfg = [];
+%   cfg.compareto = 'sample';
+%   cfg.sampletemplate = sampleTemplateSet;
+%   cfg.similaritymetric = 'correlation';
+%   corrToSample = TemplateSimilarity(microstateTemplates{msi}, cfg);
+%   [~, corrOrder] = sort(corrToSample);
+%   corrSortedMicrostateTemplates{mis} = microstateTemplates{msi}(corrOrder,:);
+% end
+% 
+% %% Plot Correlation Sorted Template Maps
+% for msi=1:length(corrSortedMicrostateTemplates);
+%   cfg = [];
+%   cfg.layout = '4D248.mat';
+%   lay = ft_prepare_layout(cfg);
+%   fh = PlotMicrostateTemplateSet(corrSortedMicrostateTemplates{msi}, dataStructs{msi}.label, lay, scanLabel{msi});
+%   
+% end
+% 
 
 

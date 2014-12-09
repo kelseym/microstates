@@ -4,7 +4,7 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 outputDir = GetLocalOutputDirectory();
-numMicrostates = 5;
+numMicrostates = 4;
 
 outputDir = [outputDir sprintf('%i microstates',numMicrostates)];
 mkdir(outputDir);

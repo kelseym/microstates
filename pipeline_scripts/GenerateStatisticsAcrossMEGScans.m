@@ -4,8 +4,8 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 baseOutputDir = GetLocalOutputDirectory();
-outputFileName = 'microstateDuration_2-10.csv';
-numMicrostatesToTest = [2,10];
+outputFileName = 'microstateDuration_2-20.csv';
+numMicrostatesToTest = [2,3,4,5,6,7,8,9,10,12,14,16,18,20];
 
 files = dir([baseDir '*.mat']);
 meanDurationByScan = {};

@@ -4,7 +4,7 @@
 
 %   Input:
 %   data - required for cluster variance statistic
-%   cfg.clusterstatistic = 'spatialcontrast', 'roughness', 'variance'
+%   cfg.clusterstatistic = 'spatialcontrast', 'roughness', 'variance', 'standarddeviation'
 %   cfg.microstatetemplates = NxS matrix where each row defines microstates template over S sensors
 
 %   cfg.sensorneighbors = fieldtrip style neighbor structure - required for used with 'spatialcontrast'
@@ -18,7 +18,7 @@ function statisticMatrix = TemplateStatistics(cfg, data)
   cfg = ft_checkconfig(cfg, 'required', {'clusterstatistic'});
 
   % ensure that the options are valid
-  cfg = ft_checkopt(cfg, 'clusterstatistic', 'char', {'spatialcontrast','roughness','variance'});
+  cfg = ft_checkopt(cfg, 'clusterstatistic', 'char', {'spatialcontrast','roughness','variance','standarddeviation'});
 
   % get the options
   microstateTemplates = ft_getopt(cfg, 'microstatetemplates');
@@ -42,6 +42,13 @@ function statisticMatrix = TemplateStatistics(cfg, data)
   elseif strcmp(clusterStatistic, 'variance')
     if isfield(data, 'microstateIndices')
       clusterVariance = ComputeClusterVariance(data);
+      statisticMatrix = clusterVariance;
+    else
+      error('data structure is missing microstateIndices field');
+    end
+  elseif strcmp(clusterStatistic, 'standarddeviation')
+    if isfield(data, 'microstateIndices')
+      clusterVariance = ComputeClusterStandardDeviation(data);
       statisticMatrix = clusterVariance;
     else
       error('data structure is missing microstateIndices field');
@@ -88,16 +95,27 @@ function meanLocalMaxima = ComputeMeanLocalMaxima(microstateTemplates, sensorLab
   end
 end
 
-% Return cluster compactness for each microstate template and assigned data
-function clusterVarinace = ComputeClusterVariance(data)
+% Return cluster variance for each microstate template and assigned data
+function clusterVariance = ComputeClusterVariance(data)
   % concatenate trials in data, allowing 
   data = ConcatenateTrials(data);
   indices = unique(data.microstateIndices{1});
-  clusterVarinace = zeros(size(indices));
+  clusterVariance = zeros(size(indices));
   for i=1:length(indices)
     microstateIndex = indices(i);
-    clusterVarinace(microstateIndex) = var(data.trial{1}(data.microstateIndices{1}==microstateIndex));
+    clusterVariance(microstateIndex) = var(data.trial{1}(data.microstateIndices{1}==microstateIndex));
   end
 end
 
+% Return cluster compactness for each microstate template and assigned data
+function clusterStandardDeviation = ComputeClusterStandardDeviation(data)
+  % concatenate trials in data, allowing 
+  data = ConcatenateTrials(data);
+  indices = unique(data.microstateIndices{1});
+  clusterStandardDeviation = zeros(size(indices));
+  for i=1:length(indices)
+    microstateIndex = indices(i);
+    clusterStandardDeviation(microstateIndex) = std(data.trial{1}(data.microstateIndices{1}==microstateIndex))/sum(data.microstateIndices{1}==microstateIndex);
+  end
+end
 

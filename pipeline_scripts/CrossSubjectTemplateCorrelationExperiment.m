@@ -7,7 +7,7 @@ clear;
 
 baseDir = GetLocalDataDirectory();
 outputDir = GetLocalOutputDirectory();
-numMicrostates = 10;
+numMicrostates = 6;
 
 %% Load a few scans and extract microstate templates from each
 files = dir([baseDir '1*5-Restin*.mat']);
@@ -53,11 +53,11 @@ end
 masterData = dataStructs{1};
 % compute variance
 cfg = [];
-cfg.clusterstatistic = 'variance';
+cfg.clusterstatistic = 'standarddeviation';
 cfg.microstatetemplates = microstateTemplates{1};
-clusterVariance = TemplateStatistics(cfg, masterData);
+clusterSpread = TemplateStatistics(cfg, masterData);
 % Plot templates sorted by cluster variance (ascending)
-[sortedClusterVariance, I] = sort(clusterVariance);
+[sortedClusterVariance, I] = sort(clusterSpread);
 sortedMasterMicrostateTemplates = masterData.microstateTemplates{1}(I,:);
 cfg = [];
 cfg.layout = '4D248.mat';
@@ -71,7 +71,7 @@ end
 varianceFigureH = figure;
 subplot(length(dataStructs),1,1);
 plot(sortedClusterVariance,'b*-','LineWidth', 2);
-title('Cluster Variance');
+title('Cluster Spread');
 xlabel('Cluster Index');
 set(gca, 'XTick', 1:numMicrostates);
 set(gca, 'XTickLabel', 1:numMicrostates);
