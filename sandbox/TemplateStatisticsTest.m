@@ -60,6 +60,11 @@ cfg = [];
 cfg.clusterstatistic = 'variance';
 cfg.microstatetemplates = microstateTemplates{1}{1};
 clusterVariance = TemplateStatistics(cfg, data);
+% compute normalized standard deviation
+cfg = [];
+cfg.clusterstatistic = 'standarddeviation';
+cfg.microstatetemplates = microstateTemplates{1}{1};
+clusterStandardDeviation = TemplateStatistics(cfg, data);
 
 % Plot templates sorted by roughness (ascending)
 [~, I] = sort(templateRoughness);
@@ -81,5 +86,13 @@ cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}(I,:), data.label, lay, ['Ascending Cluster Variance - ' scanLabel]);
+
+
+% Plot templates sorted by normalize standard deviation of clusters (ascending)
+[sortedClusterStandardDeviation, I] = sort(clusterStandardDeviation);
+cfg = [];
+cfg.layout = '4D248.mat';
+lay = ft_prepare_layout(cfg);
+fh = PlotMicrostateTemplateSet(microstateTemplates{1}{1}(I,:), data.label, lay, ['Ascending Cluster Standard Deviation (normalized) - ' scanLabel]);
 
 
