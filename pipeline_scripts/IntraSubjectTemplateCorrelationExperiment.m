@@ -5,7 +5,7 @@ clear;
 
 fileName = GetLocalDataFile();
 outputDir = GetLocalOutputDirectory();
-microstatesRange = [2,4,7,10];
+microstatesRange = [2,3,4,5,6,7,8,9,10];
 
 % select and open preprocessed HCP MEG data file
 load(fileName, 'data');
@@ -77,22 +77,30 @@ for scni=2:length(dataStructs)
   subplot(2,max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1)), 1);
   % compute the number of matches to the ith template
   [~,maxCorrIndx]=max(similarityMatrix,[],1);
+  scanDuration = nMinusOneMicrostateData.sampleinfo(2)/nMinusOneMicrostateData.fsample;
+  durationFeatureIndex = strcmp(nMinusOneMicrostateData.featurelabels, 'durationpermicrostate');
   % Plot nMinusOneTemplates in first row
   for i=1:size(nMinusOneMicrostateTemplates,1)
+    normMicrostateDuration = nMinusOneMicrostateData.featurevalues{durationFeatureIndex}(i)/scanDuration;
     colStart = nnz(maxCorrIndx<i)+1;
     colEnd = colStart + nnz(maxCorrIndx==i) - 1;
     subplot(2,max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1)), colStart:colEnd);
     PlotMicrostateTemplate(nMinusOneMicrostateTemplates(i,:), nMinusOneMicrostateData.label, lay);
+    title(sprintf('%1.2f', normMicrostateDuration));
   end
   % Plot nTemplates under highest correlated nMinusOneTemplate
   [~,nTemplateResortIndx] = sort(maxCorrIndx);
+  scanDuration = nMicrostateData.sampleinfo(2)/nMicrostateData.fsample;
+  durationFeatureIndex = strcmp(nMicrostateData.featurelabels, 'durationpermicrostate');
   for i=1:size(nMicrostateTemplates,1)
+    normMicrostateDuration = nMicrostateData.featurevalues{durationFeatureIndex}(i)/scanDuration;
     tmpltIndx = nTemplateResortIndx(i);
     subplot(2,max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1)), max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1))+i);
     PlotMicrostateTemplate(nMicrostateTemplates(tmpltIndx,:), nMicrostateData.label, lay);
+    title(sprintf('%1.3f', normMicrostateDuration));
     %title(sprintf('%1.2F', similarityMatrix
   end
-  tightfig;
+  %tightfig;
 end
 
 
