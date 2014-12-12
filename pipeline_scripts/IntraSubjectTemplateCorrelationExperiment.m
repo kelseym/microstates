@@ -33,7 +33,15 @@ for numMicrostates=microstatesRange;
   cfg.clustertrainingstyle = 'global';
   microstateTemplates = ExtractMicrostateTemplates(cfg);
   data.microstateTemplates = microstateTemplates{1};
-  
+  % find microstate sequence in electroneurophys data
+  cfg = [];
+  cfg.microstateTemplates = data.microstateTemplates{1};
+  data = AssignMicrostateLabels(cfg, data);
+  % compute features
+  cfg = [];
+  cfg.features = {'durationpermicrostate'};
+  data = MeasureFeatures(cfg, data);
+  % Store computed microstate set in data struct array
   dataStructs{end+1} = data;
 end
 
@@ -84,8 +92,7 @@ for scni=2:length(dataStructs)
     PlotMicrostateTemplate(nMicrostateTemplates(tmpltIndx,:), nMicrostateData.label, lay);
     %title(sprintf('%1.2F', similarityMatrix
   end
-  
-  
+  tightfig;
 end
 
 

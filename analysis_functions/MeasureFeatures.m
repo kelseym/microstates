@@ -25,6 +25,8 @@ function data = MeasureFeatures(cfg, data)
         featureValues{ftri} = GfpPeakRate(data);
       case 'stdgfppeaks'
         featureValues{ftri} = StdDevGfpPeaks(data);
+      case 'durationpermicrostate'
+        featureValues{ftri} = DurationPerMicrostate(data);
     end
   end
   data.featurelabels = featureLabels;
@@ -51,7 +53,6 @@ function meanMsDuration = MeanDuration(data)
       meanMsDuration(trli) = mean(msDuration)/data.fsample;
     end
   end
-
 end
 
 %% Calculate the standard deviation of the continuous duration of microstates over the trial window
@@ -95,10 +96,23 @@ function stdDevGfpPeaks = StdDevGfpPeaks(data)
     [~, peakLocs] = findpeaks(gfp,'MINPEAKDISTANCE',3);
     secondsBetweenPeaks = diff(peakLocs/data.fsample);
     stdDevGfpPeaks(trli) = std(secondsBetweenPeaks);
-    
-    
   end
 end
 
-
+%% Calulate the total duration (in seconds) of each microstate individually
+function microstateDuration = DurationPerMicrostate(data)
+  microstateDuration = zeros(size(data.microstateTemplates{1},1),1);
+  for trli=1:length(data.microstateIndices)
+    tmpltIndcs = data.microstateIndices{trli};
+    [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
+    if numel(tmplSwtchIdx) >  1 
+      % discard the leading and trailing template map runs, since it is unlikely that we are capturing the full run
+      tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
+      % count total number of occurances for each template index
+      for tmplti=1:size(data.microstateTemplates{1},1)
+        microstateDuration(tmplti) = microstateDuration(tmplti) + nnz(tmpltIndcs == tmplti)/data.fsample;
+      end
+    end
+  end
+end
 
