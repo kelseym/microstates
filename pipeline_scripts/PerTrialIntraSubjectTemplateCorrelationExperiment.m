@@ -5,7 +5,7 @@ clear;
 fileName = GetLocalDataFile();
 outputDir = GetLocalOutputDirectory();
 trialLength = 60;
-numMicrostates = 4;
+numMicrostates = 2;
 
 % select and open preprocessed HCP MEG data file
 load(fileName, 'data');
@@ -79,7 +79,7 @@ for trli=1:length(data.trial)
     [maxCorrVal,I] = max(similarityMatrix(msi,:));
     sortedClusterVariance(msi) = maxCorrVal;
     similarityMatrix(:,I) = -Inf;
-    subplot(length(data.trial)+1, numMicrostates, length(data.trial)*(trli)+msi);
+    subplot(length(data.trial)+1, numMicrostates, numMicrostates*trli+msi);
     PlotMicrostateTemplate(templates(I,:), data.label, lay);
     title(sprintf('%1.2f',sortedClusterVariance(msi)));
   end
