@@ -1,5 +1,5 @@
 %% Extract microstate features
-%  cfg.features={'meanduration','stdduration','gfppeakrate','stdgfppeaks'}
+%  cfg.features={'meanduration','stdduration','gfppeakrate','stdgfppeaks','totaldurationpermicrostate','durationpermicrostate','statetransitions'}
 
 function data = MeasureFeatures(cfg, data)
 
@@ -25,8 +25,12 @@ function data = MeasureFeatures(cfg, data)
         featureValues{ftri} = GfpPeakRate(data);
       case 'stdgfppeaks'
         featureValues{ftri} = StdDevGfpPeaks(data);
+      case 'totaldurationpermicrostate'
+        featureValues{ftri} = TotalDurationPerMicrostate(data);
       case 'durationpermicrostate'
         featureValues{ftri} = DurationPerMicrostate(data);
+      case 'statetransitions'
+        featureValues{ftri} = StateTransitions(data);
     end
   end
   data.featurelabels = featureLabels;
@@ -100,8 +104,8 @@ function stdDevGfpPeaks = StdDevGfpPeaks(data)
 end
 
 %% Calulate the total duration (in seconds) of each microstate individually
-function microstateDuration = DurationPerMicrostate(data)
-  microstateDuration = zeros(size(data.microstateTemplates{1},1),1);
+function totalMicrostateDuration = TotalDurationPerMicrostate(data)
+  totalMicrostateDuration = zeros(size(data.microstateTemplates{1},1),1);
   for trli=1:length(data.microstateIndices)
     tmpltIndcs = data.microstateIndices{trli};
     [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
@@ -110,7 +114,45 @@ function microstateDuration = DurationPerMicrostate(data)
       tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
       % count total number of occurances for each template index
       for tmplti=1:size(data.microstateTemplates{1},1)
-        microstateDuration(tmplti) = microstateDuration(tmplti) + nnz(tmpltIndcs == tmplti)/data.fsample;
+        totalMicrostateDuration(tmplti) = totalMicrostateDuration(tmplti) + nnz(tmpltIndcs == tmplti)/data.fsample;
+      end
+    end
+  end
+end
+
+%% Calulate the individual duration (in seconds) of each microstate presentation
+function microstateDuration = DurationPerMicrostate(data)
+  for trli=1:length(data.microstateIndices)
+    tmpltIndcs = data.microstateIndices{trli};
+    [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
+    if numel(tmplSwtchIdx) >  1 
+      % discard the leading and trailing template map runs, since it is unlikely that we are capturing the full run
+      tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
+      % find length of each microstate presentation
+      for tmplti=1:size(data.microstateTemplates{1},1)
+        I = diff([0 (tmpltIndcs == tmplti) 0]);
+        microstateDuration{tmplti} = (find(I==-1) - find(I==1))/data.fsample;
+      end
+    end
+  end
+end
+
+%% Produce NxM transistion matrix where each element holds a count of transistions from state N to state M
+function transitionMatrix = StateTransitions(data)
+  for trli=1:length(data.microstateIndices)
+  numMicrostates = size(data.microstateTemplates{trli},1);
+    tmpltIndcs = data.microstateIndices{trli};
+    for sNi=1:numMicrostates
+      for sMi=1:numMicrostates
+        if sNi==sMi
+          continue;
+        end
+        [~,sNloc] = find(tmpltIndcs==sNi);
+        [~,sMloc] = find(tmpltIndcs==sMi);
+        % find the locations of transitions from sN to sM
+        transitionLoc = intersect(sNloc+1, sMloc);
+        n2mTransitions = length(transitionLoc);
+        transitionMatrix{trli}(sNi,sMi) = n2mTransitions;
       end
     end
   end

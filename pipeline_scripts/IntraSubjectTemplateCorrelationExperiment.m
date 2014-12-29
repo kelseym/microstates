@@ -39,7 +39,7 @@ for numMicrostates=microstatesRange;
   data = AssignMicrostateLabels(cfg, data);
   % compute features
   cfg = [];
-  cfg.features = {'durationpermicrostate'};
+  cfg.features = {'statetransitions'};
   data = MeasureFeatures(cfg, data);
   % Store computed microstate set in data struct array
   dataStructs{end+1} = data;
@@ -81,23 +81,23 @@ for scni=2:length(dataStructs)
   durationFeatureIndex = strcmp(nMinusOneMicrostateData.featurelabels, 'durationpermicrostate');
   % Plot nMinusOneTemplates in first row
   for i=1:size(nMinusOneMicrostateTemplates,1)
-    normMicrostateDuration = nMinusOneMicrostateData.featurevalues{durationFeatureIndex}(i)/scanDuration;
+    microstateDuration = nMinusOneMicrostateData.featurevalues{durationFeatureIndex}{i};
     colStart = nnz(maxCorrIndx<i)+1;
     colEnd = colStart + nnz(maxCorrIndx==i) - 1;
     subplot(2,max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1)), colStart:colEnd);
     PlotMicrostateTemplate(nMinusOneMicrostateTemplates(i,:), nMinusOneMicrostateData.label, lay);
-    title(sprintf('%1.2f', normMicrostateDuration));
+    title(sprintf('%1.2f', mean(microstateDuration)));
   end
   % Plot nTemplates under highest correlated nMinusOneTemplate
   [~,nTemplateResortIndx] = sort(maxCorrIndx);
   scanDuration = nMicrostateData.sampleinfo(2)/nMicrostateData.fsample;
   durationFeatureIndex = strcmp(nMicrostateData.featurelabels, 'durationpermicrostate');
   for i=1:size(nMicrostateTemplates,1)
-    normMicrostateDuration = nMicrostateData.featurevalues{durationFeatureIndex}(i)/scanDuration;
+    microstateDuration = nMicrostateData.featurevalues{durationFeatureIndex}{i};
     tmpltIndx = nTemplateResortIndx(i);
     subplot(2,max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1)), max(size(nMinusOneMicrostateTemplates,1), size(nMicrostateTemplates,1))+i);
     PlotMicrostateTemplate(nMicrostateTemplates(tmpltIndx,:), nMicrostateData.label, lay);
-    title(sprintf('%1.3f', normMicrostateDuration));
+    title(sprintf('%1.3f', mean(microstateDuration)));
     %title(sprintf('%1.2F', similarityMatrix
   end
   %tightfig;
