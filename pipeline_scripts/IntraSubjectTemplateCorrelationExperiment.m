@@ -39,7 +39,7 @@ for numMicrostates=microstatesRange;
   data = AssignMicrostateLabels(cfg, data);
   % compute features
   cfg = [];
-  cfg.features = {'statetransitions'};
+  cfg.features = {'durationpermicrostate'};
   data = MeasureFeatures(cfg, data);
   % Store computed microstate set in data struct array
   dataStructs{end+1} = data;
