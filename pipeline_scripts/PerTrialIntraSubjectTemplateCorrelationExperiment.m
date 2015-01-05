@@ -5,7 +5,8 @@ clear;
 fileName = GetLocalDataFile();
 outputDir = GetLocalOutputDirectory();
 trialLength = 60;
-numMicrostates = 2;
+trialOverlap = 0.5;
+numMicrostates = 4;
 
 % select and open preprocessed HCP MEG data file
 load(fileName, 'data');
@@ -30,7 +31,7 @@ lay = ft_prepare_layout(cfg);
 %% partition data into N second (non-)overlaping trials
 cfg = [];
 cfg.length=trialLength;
-cfg.overlap=0.0;
+cfg.overlap=trialOverlap;
 % Concatenate time series data end-to-end in a single trial
 data = ConcatenateTrials(data);
 % Redistribute into new trial lengths
@@ -64,6 +65,7 @@ globalData = ConcatenateTrials(data);
 clusterSpread = TemplateStatistics(cfg, globalData);
 [~, globalSortingI] = sort(clusterSpread);
 sortedGlobalTemplates = globalMicrostateTemplates{1}{1}(globalSortingI,:);
+fh = figure;
 for msi=1:numMicrostates
   subplot(length(data.trial)+1, numMicrostates, msi);
   PlotMicrostateTemplate(sortedGlobalTemplates(msi,:), data.label, lay);
