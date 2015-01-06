@@ -13,8 +13,6 @@ load(fileName, 'data');
 % band filter preprocess
 cfg = [];
 cfg.continuous = 'yes';
-cfg.bsfilter = 'yes';
-cfg.bsfreq = [59 61; 119 121; 179 181];
 cfg.demean = 'yes';
 cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
