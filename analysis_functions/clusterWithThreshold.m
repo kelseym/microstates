@@ -5,7 +5,7 @@
 % clusterID is returned as an array of cluster labels 1-M, with m being the number of resultant clusters.
 % Observations that do not meet the correlation threshold criteria are labeled with -1 in the clusterID array.
 
-function clusterID = clusterWithThreshold(X, threshold, label, layout)
+function clusterID = ClusterWithThreshold(X, threshold, label, layout)
   
   % cluster analysis
   %  generate a distance array in the form of pdist() output
