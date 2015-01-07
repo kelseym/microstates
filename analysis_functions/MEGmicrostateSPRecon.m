@@ -74,6 +74,7 @@ cfg.method        = 'mne';
 cfg.grid          = gridLF;
 cfg.vol           = headmodel;
 cfg.channel       = channels;
+%cfg.singletrial   = 'yes';
 cfg.mne.prewhiten = 'yes';
 cfg.mne.noisecov  = eye(numel(channels))*noise_level;
 
@@ -81,20 +82,20 @@ cfg.mne.noisecov  = eye(numel(channels))*noise_level;
 % Loop through the microstates
 
 for ti=1:size(MicroStates,1)
-    MicrostateTopo = MicroStates(ti,:);
+%    MicrostateTopo = MicroStates(ti,:);
     % normalisation of the topographies for ft_sourceanalysis. This will take
     % some tweaking
-    for i = 1:size(MicrostateTopo, 2)
-      val(i) = 0.01*max(abs(MicrostateTopo(:, i)));
-      MicrostateTopo(:, i) = MicrostateTopo(:, i)/val(i);
-    end
+%    for i = 1:size(MicrostateTopo, 2)
+%      val(i) = 0.01*max(abs(MicrostateTopo(:, i)));
+%      MicrostateTopo(:, i) = MicrostateTopo(:, i)/val(i);
+%    end
    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
    % do an MNE with different regularisation for each microstate
     
    % use the channel-level topography of the current Microstate
-   tlck.avg = MicrostateTopo(:, ti);
+   tlck.avg(:, 1) = MicroStates(ti, :);
    % estimate the snr of the current Microstate
-   cfg.mne.snr = sqrt(mean((MicrostateTopo(:,ti)-mean(MicrostateTopo(:,ti))).^2))/noise_level;
+   cfg.mne.snr = sqrt(mean((MicroStates(ti, :)-mean(MicroStates(ti, :))).^2))/noise_level;
    noisevec(ti) = cfg.mne.snr; 
    
   tmp = ft_sourceanalysis(cfg, tlck);
@@ -105,6 +106,7 @@ for ti=1:size(MicroStates,1)
   
   % Plot source space map for each microstate (need number of vertices)
   ft_plot_mesh(tmp,'vertexcolor',sourcemodelsubj.inside)
+  %ft_plot_mesh(tmp,'vertexcolor',tmp.avg.mom)
   view(-90,90)
   % Prepare output structure
   source(ti) = tmp;
