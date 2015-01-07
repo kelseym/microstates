@@ -15,36 +15,48 @@ dataMatrix = data.trial{1};
 
 %% compute microstate templates and gfp
 [gfp, gfpPkLocs] = LocateGfpPeaks(dataMatrix);
+maxNumMicroStates = 20;
+for numMicrostates=1:maxNumMicroStates
+  cfg = [];
+  cfg.numtemplates = numMicrostates;
+  cfg.datastructs = data;
+  cfg.clustertrainingstyle = 'global';
+  globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 
-numMicrostates=2;
+  microstateTemplates = globalMicrostateTemplates{1}{1};
 
-cfg = [];
-cfg.numtemplates = numMicrostates;
-cfg.datastructs = data;
-cfg.clustertrainingstyle = 'global';
-globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
+  % Compute correlation between templates and original signal
+  templateCorrelations = zeros(size(microstateTemplates,1),size(dataMatrix,2));
+  for tmpltj=1:size(microstateTemplates,1)
+      template = microstateTemplates(tmpltj,:)';
+      templateCorrelations(tmpltj,:) = abs(corr(template,dataMatrix(:,:)));
+  end
+  [maxCorrTempl, maxCorrTemplIdx] = max(templateCorrelations,[],1);
 
-microstateTemplates = globalMicrostateTemplates{1}{1};
-
-% Compute correlation between templates and original signal
-templateCorrelations = zeros(size(microstateTemplates,1),size(dataMatrix,2));
-for tmpltj=1:size(microstateTemplates,1)
-    template = microstateTemplates(tmpltj,:)';
-    templateCorrelations(tmpltj,:) = abs(corr(template,dataMatrix(:,:)));
+  % GEV per template
+  gevk = zeros(numMicrostates,1);
+  gfpPeakMask = zeros(size(maxCorrTemplIdx));
+  gfpPeakMask(gfpPkLocs) = 1;
+  maxCorrTemplIdx = gfpPeakMask.*maxCorrTemplIdx;
+  for msi=1:numMicrostates
+      templateMatchMask = maxCorrTemplIdx == msi;
+      prod = gfp(templateMatchMask).*templateCorrelations(msi,templateMatchMask);
+      numer = sumsqr(prod);
+      denom = sumsqr(gfp(find(gfpPeakMask)));
+      gevk(msi) = numer/denom;
+  end
+  gev(numMicrostates) = sum(gevk);
 end
 
-% GEV per template
-gevk = zeros(numMicrostates,1);
-for msi=1:numMicrostates
-    tmpltMtchMsk = maxCorrTemplIdx{trli} == msi;
-    prod = gfp{trli}(tmpltMtchMsk).*templateCorrelations{trli}(msi,tmpltMtchMsk);
-    numer = sumsqr(prod);
-    denom = sumsqr(gfp{trli}(tmpltMtchMsk));
-    gevk(msi) = numer/denom;
-end
-globalExVarK{trli, numMicrostates} = gevk;
-
-
+%% Plot GEV
+figure, hold on;
+title('Template Quantity Selection');
+ylabel('GEV');
+xlabel('Number of Microstate Templates');
+plot(gev,'-', 'LineWidth', 3);
+grid off;
+set(gca, 'XGrid', 'on');
+xlim([1 maxNumMicroStates]);
 
 
 
