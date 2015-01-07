@@ -4,6 +4,8 @@ clear;
 
 numMicrostates = 4;
 threshold = .60;
+trialLength = 30;
+
 
 fileName = GetLocalDataFile();
 load(fileName);
@@ -16,13 +18,7 @@ cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
 data = ft_preprocessing(cfg, data);
 
-data = ConcatenateTrials(data);
-cfg = [];
-cfg.length=10;
-cfg.overlap=0.0;
-data = ft_redefinetrial(cfg, data);
-
-
+%% Open layout file
 cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
@@ -33,7 +29,22 @@ cfg.numtemplates = numMicrostates;
 cfg.datastructs = data;
 cfg.clustertrainingstyle = 'global';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
-PlotMicrostateTemplateSet(globalMicrostateTemplates{1}{1}, data.label, lay, 'Global Microstates');
+% Compute and label templates with GEV
+gevk = ComputeGlobalExplainedVariance(globalMicrostateTemplates{1}{1}, data.trial{1});
+gev = sum(gevk)
+figure('name', sprintf('Global Microstates  -  GEV : %1.2f',gev));
+for i=1:numMicrostates
+  subplot(1,numMicrostates,i);
+  PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),data.label, lay);
+  title(sprintf('%1.2f',gevk(i)));
+end
+
+data = ConcatenateTrials(data);
+cfg = [];
+cfg.length=trialLength;
+cfg.overlap=0.0;
+data = ft_redefinetrial(cfg, data);
+
 
 %% Compute and plot trial-wise microstates
 cfg = [];
@@ -41,6 +52,14 @@ cfg.numtemplates = numMicrostates;
 cfg.datastructs = data;
 cfg.clustertrainingstyle = 'trial';
 microstateTemplates = ExtractMicrostateTemplates(cfg);
+
+% Compute GEV for each template in this per trial
+trialGevk = zeros(length(microstateTemplates{1}), numMicrostates);
+for i=1:length(microstateTemplates{1})
+  trialGevk(i,:) = ComputeGlobalExplainedVariance(microstateTemplates{1}{i}, data.trial{i});
+end
+trialGev = sum(trialGevk,2);
+avgTrialGev = mean(trialGev)
 
 % Combine all microstateTemplates for the purpose of template clustering
 X = [];
@@ -118,8 +137,9 @@ for ri=1:rows
     tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot);
     if ~isempty(tmpltIndx)
       subplot(rows,cols,eli);
-      tmpltIndx = ((ri-1)*numMicrostates)+tmpltIndx;
-      PlotMicrostateTemplate(X(tmpltIndx,:),data.label,lay);
+      tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
+      PlotMicrostateTemplate(X(tmpltIndx2,:),data.label,lay);
+      title(sprintf('%1.2f',trialGevk(ri,tmpltIndx)));
     end
     
     
