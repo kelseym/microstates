@@ -2,8 +2,8 @@
 
 clear;
 
-numMicrostates = 5;
-threshold = .75;
+numMicrostates = 4;
+threshold = .60;
 
 fileName = GetLocalDataFile();
 load(fileName);
@@ -18,7 +18,7 @@ data = ft_preprocessing(cfg, data);
 
 data = ConcatenateTrials(data);
 cfg = [];
-cfg.length=30;
+cfg.length=10;
 cfg.overlap=0.0;
 data = ft_redefinetrial(cfg, data);
 
@@ -27,6 +27,15 @@ cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 
+%% compute and plot global microstates
+cfg = [];
+cfg.numtemplates = numMicrostates;
+cfg.datastructs = data;
+cfg.clustertrainingstyle = 'global';
+globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
+PlotMicrostateTemplateSet(globalMicrostateTemplates{1}{1}, data.label, lay, 'Global Microstates');
+
+%% Compute and plot trial-wise microstates
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = data;
@@ -51,14 +60,16 @@ end
 
 %% cluster analysis
 %  generate a distance array in the form of pdist() output
-distTree = [];
+distTree = zeros(1,(size(X,1)*(size(X,1)-1))/2);
+coeffs = corrcoef(X');
+k = 1;
 for i=1:size(X,1)
   for j=1:size(X,1)
     if j<=i
       continue;
     end
-    coeffs = corrcoef(X(i,:), X(j,:));
-    distTree(end+1) = coeffs(1,2);
+    distTree(k) = coeffs(i,j);
+    k=k+1;
   end
 end
 sqDistTree = squareform(distTree);
@@ -83,12 +94,39 @@ for numClusters=1:size(clusterIDs,2)
       end
     end
   end
-  numClusters, minCoef
   if minCoef >= threshold
-    clusterID = ids;
+    clusterId = ids;
     break;
   end
 end
+
+%% Plot templates aligned by clusterID
+rows = size(X,1)/numMicrostates;
+cols = length(unique(clusterId));
+for cid=1:length(unique(clusterId))
+  clusterCount(cid) = length(find(clusterId==cid));
+end
+[~, clusterSortingI] = sort(clusterCount,2,'descend');
+clusterIdSq = reshape(clusterId,numMicrostates,[])';
+% plot clusters with the most members first (left)
+figure('name',sprintf('%i repeating out of %i distinct microstates', length(find(clusterCount>1)),length(unique(clusterId))));
+for ri=1:rows
+  for ci=1:cols
+    eli = ((ri-1)*cols)+ci;
+    clusterIdToPlot = clusterSortingI(ci);
+    % if row ri contans clusterIdToPlot, plot it here
+    tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot);
+    if ~isempty(tmpltIndx)
+      subplot(rows,cols,eli);
+      tmpltIndx = ((ri-1)*numMicrostates)+tmpltIndx;
+      PlotMicrostateTemplate(X(tmpltIndx,:),data.label,lay);
+    end
+    
+    
+  end
+end
+    
+ 
 
 
 

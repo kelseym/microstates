@@ -1,7 +1,7 @@
 % Compute GFP and peaks
 %  Optionally, ignore peaks within N std dev of the mean within some window centered at each peak
 %   Use windowLength of ~ or 0 to report all peaks
-function [gfp, gfpPkLocs] = locateGfpPeaks(dataMatrix, windowLength, stdDevFactor)
+function [gfp, gfpPkLocs] = LocateGfpPeaks(dataMatrix, windowLength, stdDevFactor)
   numChan = size(dataMatrix,2);
   dataSize = size(dataMatrix,2);
 
