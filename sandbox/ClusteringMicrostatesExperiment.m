@@ -2,9 +2,13 @@
 
 clear;
 
-numMicrostates = 4;
-threshold = .60;
-trialLength = 30;
+% Use custom subplot to reduce plot border thickness
+%                                  gap:[height width] fig border:[bottom top]
+%subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
+
+numMicrostates = 3;
+combinationThreshold = 1/numMicrostates;
+trialLength = 20;
 
 
 fileName = GetLocalDataFile();
@@ -23,7 +27,9 @@ cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% compute and plot global microstates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = data;
@@ -31,7 +37,7 @@ cfg.clustertrainingstyle = 'global';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 % Compute and label templates with GEV
 gevk = ComputeGlobalExplainedVariance(globalMicrostateTemplates{1}{1}, data.trial{1});
-gev = sum(gevk)
+gev = sum(gevk);
 figure('name', sprintf('Global Microstates  -  GEV : %1.2f',gev));
 for i=1:numMicrostates
   subplot(1,numMicrostates,i);
@@ -39,24 +45,46 @@ for i=1:numMicrostates
   title(sprintf('%1.2f',gevk(i)));
 end
 
-data = ConcatenateTrials(data);
+% assign microstate labels and measure features
+cfg = [];
+cfg.microstateTemplates = globalMicrostateTemplates{1};
+globalData = AssignMicrostateLabels(cfg,data);
+
+globalData.microstateTemplates = globalMicrostateTemplates{1};
+cfg =[];
+cfg.features = {'meanduration','stdduration','durationpermicrostate','statetransitions','templatedominance'};
+globalData = MeasureFeatures(cfg, globalData);
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Compute and plot trial-wise microstates
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+trialData = ConcatenateTrials(data);
 cfg = [];
 cfg.length=trialLength;
 cfg.overlap=0.0;
-data = ft_redefinetrial(cfg, data);
+trialData = ft_redefinetrial(cfg, trialData);
 
-
-%% Compute and plot trial-wise microstates
 cfg = [];
 cfg.numtemplates = numMicrostates;
-cfg.datastructs = data;
+cfg.datastructs = trialData;
 cfg.clustertrainingstyle = 'trial';
 microstateTemplates = ExtractMicrostateTemplates(cfg);
+
+% assign microstate labels and measure features
+cfg = [];
+cfg.microstateTemplates = microstateTemplates{1};
+trialData = AssignMicrostateLabels(cfg,trialData);
+
+trialData.microstateTemplates = microstateTemplates{1};
+cfg =[];
+cfg.features = {'meanduration','stdduration','durationpermicrostate','statetransitions','templatedominance'};
+trialData = MeasureFeatures(cfg, trialData);
+
 
 % Compute GEV for each template in this per trial
 trialGevk = zeros(length(microstateTemplates{1}), numMicrostates);
 for i=1:length(microstateTemplates{1})
-  trialGevk(i,:) = ComputeGlobalExplainedVariance(microstateTemplates{1}{i}, data.trial{i});
+  trialGevk(i,:) = ComputeGlobalExplainedVariance(microstateTemplates{1}{i}, trialData.trial{i});
 end
 trialGev = sum(trialGevk,2);
 avgTrialGev = mean(trialGev)
@@ -74,7 +102,7 @@ cols = numMicrostates;
 rows = size(X,1)/numMicrostates;
 for i=1:size(X,1)
   subplot(rows,cols,i);
-  PlotMicrostateTemplate(X(i,:),data.label,lay);
+  PlotMicrostateTemplate(X(i,:),trialData.label,lay);
 end
 
 %% cluster analysis
@@ -92,7 +120,7 @@ for i=1:size(X,1)
   end
 end
 sqDistTree = squareform(distTree);
-clustTree = linkage(1-distTree, 'average');
+clustTree = linkage(1-distTree, 'single');
 clusterIDs = cluster(clustTree,'maxclust',1:size(X,1));
 
 % find cluster assignment (column in clusterIDs) that results in all cluster members correlated >= threshold
@@ -113,7 +141,7 @@ for numClusters=1:size(clusterIDs,2)
       end
     end
   end
-  if minCoef >= threshold
+  if minCoef >= combinationThreshold
     clusterId = ids;
     break;
   end
@@ -138,7 +166,7 @@ for ri=1:rows
     if ~isempty(tmpltIndx)
       subplot(rows,cols,eli);
       tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
-      PlotMicrostateTemplate(X(tmpltIndx2,:),data.label,lay);
+      PlotMicrostateTemplate(X(tmpltIndx2,:),trialData.label,lay);
       title(sprintf('%1.2f',trialGevk(ri,tmpltIndx)));
     end
     

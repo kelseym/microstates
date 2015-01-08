@@ -1,5 +1,5 @@
 %% Extract microstate features
-%  cfg.features={'meanduration','stdduration','gfppeakrate','stdgfppeaks','totaldurationpermicrostate','durationpermicrostate','statetransitions'}
+%  cfg.features={'meanduration','stdduration','gfppeakrate','stdgfppeaks','totaldurationpermicrostate','durationpermicrostate','statetransitions','templatedominance'}
 
 function data = MeasureFeatures(cfg, data)
 
@@ -31,6 +31,8 @@ function data = MeasureFeatures(cfg, data)
         featureValues{ftri} = DurationPerMicrostate(data);
       case 'statetransitions'
         featureValues{ftri} = StateTransitions(data);
+      case 'templatedominance'
+        featureValues{ftri} = TemplateDominance(data);
     end
   end
   data.featurelabels = featureLabels;
@@ -139,8 +141,8 @@ end
 
 %% Produce NxM transistion matrix where each element holds a count of transistions from state N to state M
 function transitionMatrix = StateTransitions(data)
+  numMicrostates = size(data.microstateTemplates{1},1);
   for trli=1:length(data.microstateIndices)
-  numMicrostates = size(data.microstateTemplates{trli},1);
     tmpltIndcs = data.microstateIndices{trli};
     for sNi=1:numMicrostates
       for sMi=1:numMicrostates
@@ -158,3 +160,28 @@ function transitionMatrix = StateTransitions(data)
   end
 end
 
+%% Calulate the total duration (in seconds) of each microstate individually
+function templateDominance = TemplateDominance(data)
+  for trli=1:length(data.microstateIndices)
+    tmpltIndcs = data.microstateIndices{trli};
+    [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
+    if numel(tmplSwtchIdx) >  1 
+      % discard the leading and trailing template map runs, since it is unlikely that we are capturing the full run
+      tmpltIndcs = tmpltIndcs((tmplSwtchIdx(1)+1):tmplSwtchIdx(end));
+      [~, tmplSwtchIdx] = find(diff(tmpltIndcs));
+      tmplSwtchVl = tmpltIndcs([tmplSwtchIdx length(tmpltIndcs)]);
+      % include indices to represent the first and final full templates in the window
+      tmplSwtchIdx = [0 tmplSwtchIdx length(tmpltIndcs)];
+      % find average length of template match
+      msDuration = diff(tmplSwtchIdx);
+      segmentDuration = tmplSwtchIdx(end)-tmplSwtchIdx(1);
+      tmpltCvrg = zeros(size(data.microstateTemplates{1},1),1);
+      for tmplti=1:size(data.microstateTemplates{1},1)
+        tmpltCvrg(tmplti) = sum(msDuration(tmplSwtchVl==tmplti)/segmentDuration);
+      end
+      templateDominance(trli) = sumsqr(tmpltCvrg);
+    else
+      templateDominance(trli) = NaN;
+    end
+  end
+end

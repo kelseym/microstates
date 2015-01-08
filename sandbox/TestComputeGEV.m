@@ -2,8 +2,8 @@
 clear;
 % load data
 fileName = GetLocalDataFile();
-maxNumMicroStates = 10;
-trialLength = 10;
+maxNumMicroStates = 6;
+trialLength = 40;
 
 
 load(fileName);
@@ -77,7 +77,7 @@ for i=1:length(data.trial)
   lgnd{end+1}=sprintf('%i',i);
 end
 legend(lgnd);
-plot(mean(trialGev),'k*','MarkerSize', 15);
+plot(mean(trialGev),'k-*','LineWidth',2,'MarkerSize', 15);
 
 
 plot(gev,'b-', 'LineWidth', 3);
