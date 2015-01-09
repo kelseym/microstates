@@ -1,14 +1,15 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
+plotTopo = 0;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
-numMicrostates = 3;
+numMicrostates = 4;
 combinationThreshold = 1/numMicrostates;
-trialLength = 20;
+trialLength = 10;
 
 
 fileName = GetLocalDataFile();
@@ -21,6 +22,13 @@ cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
 data = ft_preprocessing(cfg, data);
+% bin data into 10 sec nonoverlapping trials
+data = ConcatenateTrials(data);
+cfg = [];
+cfg.length=10;
+cfg.overlap=0.0;
+data = ft_redefinetrial(cfg, data);
+
 
 %% Open layout file
 cfg = [];
@@ -38,11 +46,13 @@ globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 % Compute and label templates with GEV
 gevk = ComputeGlobalExplainedVariance(globalMicrostateTemplates{1}{1}, data.trial{1});
 gev = sum(gevk);
-figure('name', sprintf('Global Microstates  -  GEV : %1.2f',gev));
-for i=1:numMicrostates
-  subplot(1,numMicrostates,i);
-  PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),data.label, lay);
-  title(sprintf('%1.2f',gevk(i)));
+if plotTopo
+  figure('name', sprintf('Global Microstates  -  GEV : %1.2f',gev));
+  for i=1:numMicrostates
+    subplot(1,numMicrostates,i);
+    PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),data.label, lay);
+    title(sprintf('%1.2f',gevk(i)));
+  end
 end
 
 % assign microstate labels and measure features
@@ -97,14 +107,16 @@ end
 
 
 % Plot topographies
-figure;
-cols = numMicrostates;
-rows = size(X,1)/numMicrostates;
-for i=1:size(X,1)
-  subplot(rows,cols,i);
-  PlotMicrostateTemplate(X(i,:),trialData.label,lay);
+if plotTopo
+  figure;
+  cols = numMicrostates;
+  rows = size(X,1)/numMicrostates;
+  for i=1:size(X,1)
+    subplot(rows,cols,i);
+    PlotMicrostateTemplate(X(i,:),trialData.label,lay);
+  end
 end
-
+  
 %% cluster analysis
 %  generate a distance array in the form of pdist() output
 distTree = zeros(1,(size(X,1)*(size(X,1)-1))/2);
@@ -156,25 +168,51 @@ end
 [~, clusterSortingI] = sort(clusterCount,2,'descend');
 clusterIdSq = reshape(clusterId,numMicrostates,[])';
 % plot clusters with the most members first (left)
-figure('name',sprintf('%i repeating out of %i distinct microstates', length(find(clusterCount>1)),length(unique(clusterId))));
-for ri=1:rows
-  for ci=1:cols
-    eli = ((ri-1)*cols)+ci;
-    clusterIdToPlot = clusterSortingI(ci);
-    % if row ri contans clusterIdToPlot, plot it here
-    tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot);
-    if ~isempty(tmpltIndx)
-      subplot(rows,cols,eli);
-      tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
-      PlotMicrostateTemplate(X(tmpltIndx2,:),trialData.label,lay);
-      title(sprintf('%1.2f',trialGevk(ri,tmpltIndx)));
+if plotTopo
+  figure('name',sprintf('%i repeating out of %i distinct microstates', length(find(clusterCount>1)),length(unique(clusterId))));
+  for ri=1:rows
+    for ci=1:cols
+      eli = ((ri-1)*cols)+ci;
+      clusterIdToPlot = clusterSortingI(ci);
+      % if row ri contans clusterIdToPlot, plot it here
+      tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot);
+      if ~isempty(tmpltIndx)
+        subplot(rows,cols,eli);
+        tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
+        PlotMicrostateTemplate(X(tmpltIndx2,:),trialData.label,lay);
+        title(sprintf('%1.2f',trialGevk(ri,tmpltIndx)));
+      end
+
+
     end
-    
-    
   end
-end
-    
+end    
  
 
+%% Plot feature values
 
+% Global template features vs trial template features
+figure;
+featureIndx = find(strcmp('meanduration',globalData.featurelabels));
+plot(globalData.featurevalues{featureIndx},'k');
+hold on;
+featureIndx = find(strcmp('meanduration',trialData.featurelabels));
+plot(trialData.featurevalues{featureIndx},'r');
+title('meanduration');
+
+figure;
+featureIndx = find(strcmp('stdduration',globalData.featurelabels));
+plot(globalData.featurevalues{featureIndx},'k');
+hold on;
+featureIndx = find(strcmp('stdduration',trialData.featurelabels));
+plot(trialData.featurevalues{featureIndx},'r');
+title('stdduration');
+
+figure;
+featureIndx = find(strcmp('templatedominance',globalData.featurelabels));
+plot(globalData.featurevalues{featureIndx},'k');
+hold on;
+featureIndx = find(strcmp('templatedominance',trialData.featurelabels));
+plot(trialData.featurevalues{featureIndx},'r');
+title('templatedominance');
 
