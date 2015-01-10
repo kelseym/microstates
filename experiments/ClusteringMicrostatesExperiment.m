@@ -1,7 +1,7 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
-plotTopo = 0;
+plotTopo = 1;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
@@ -9,7 +9,7 @@ plotTopo = 0;
 
 numMicrostates = 4;
 combinationThreshold = 1/numMicrostates;
-trialLength = 10;
+trialLength = 30;
 
 
 fileName = GetLocalDataFile();

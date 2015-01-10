@@ -1,16 +1,16 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
-plotTopo = 1;
+plotTopo = 0;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
 numMicrostates = 3;
-trialLengths = [60];
+trialLengths = [5 10 20 30 40 50 60 70 80 90 100 110 120 130 140];
 combinationThreshold = 1/numMicrostates;
-numMicrostateBins = 4;
+numMicrostateBins = 3;
 
 fileName = GetLocalDataFile();
 load(fileName);
@@ -39,7 +39,8 @@ cfg.clustertrainingstyle = 'global';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 
 % Compute trial-wise microstates
-for trlLngth=trialLengths
+for exprmnti=1:length(trialLengths)
+  trlLngth = trialLengths(exprmnti);
   cfg = [];
   cfg.length=trlLngth;
   cfg.overlap=0.0;
@@ -60,6 +61,7 @@ for trlLngth=trialLengths
 
   clusterId = ClusterTemplates(X, combinationThreshold);
 
+  clusterCount=[];
   for cid=1:length(unique(clusterId))
     clusterCount(cid) = length(find(clusterId==cid));
   end
@@ -93,29 +95,80 @@ for trlLngth=trialLengths
   Xsq = reshape(X,numMicrostates,numTrials,[]);
   Xsq = permute(Xsq,[2 1 3]);  % Xsq(i,j,k) i=trial index, j=template index, k=sensor index
   
-  rows = size(X,1)/numMicrostates;
-  cols = numMicrostateBins;
-  
-  for ri=1:rows
-    for ci=1:cols
-      
+  %Reshape Xsq to reflect sorted and grouped microstates guided by clusterIdSq and clusterSortingI 
+  %   sortedXsq should match the representation in the above figure
+  sortedXsq = -Inf*ones(size(Xsq,1),length(clusterSortingI),size(Xsq,3));
+  for toCol=1:length(clusterSortingI)
+    clstrId=clusterSortingI(toCol);
+    for ri=1:size(Xsq,1)
+      fromCol = find(clusterIdSq(ri,:)==clstrId);
+      if ~isempty(fromCol)
+        sortedXsq(ri,toCol,:) = Xsq(ri,fromCol,:);
+      end
     end
   end
-    
-    
-    
-    
-    
-    
- 
   
+  % for each microstate bin, fill in empty template maps with those from the leftover bin.
+  % start with the largest groups in the leftovers (first column in leftoverBinXSq
+  binnedXsq = sortedXsq(:,1:numMicrostateBins,:);
+  if size(sortedXsq,2) > numMicrostateBins
+    binnedXsq = sortedXsq(:,1:numMicrostateBins,:);
+    leftoverBinXsq = sortedXsq(:,numMicrostateBins+1:size(sortedXsq,2),:);
+    for toCol=1:size(binnedXsq,2)
+      colAvgTemplate = squeeze(mean(binnedXsq(find(binnedXsq(:,toCol,1)~=-Inf),toCol,:),1))';
+      for toRow=1:size(binnedXsq,1)
+        if binnedXsq(toRow,toCol,1) == -Inf %empty bin found, fill with template from the leftover bin with max corrcoef
+          coef=[];
+          for lftvri=1:size(leftoverBinXsq,2)
+            coefSq = corrcoef(squeeze(colAvgTemplate), squeeze(leftoverBinXsq(toRow,lftvri,:)));
+            coef(end+1) = coefSq(1,2);
+          end
+          [~, maxCorrI] = max(coef); % maxCorrI holds the column index into leftoverBinXsq containing the best fit template to the missing space in binnedXsq
+          binnedXsq(toRow,toCol,:) = leftoverBinXsq(toRow,maxCorrI,:);
+          leftoverBinXsq(toRow,maxCorrI,:) = -Inf;
+        end
+      end
+    end
+  end
   
-  
-  
-  
+  % Plot binned topographies
+  if plotTopo
+    figure('name',sprintf('Trial Length: %i sec',trlLngth));
+    rows = size(binnedXsq,1);
+    cols = size(binnedXsq,2);
+    for ri=1:rows
+      for ci=1:cols
+        subplot(rows,cols,(ri-1)*cols+ci);
+        PlotMicrostateTemplate(squeeze(binnedXsq(ri,ci,:))',trialData.label,lay);
+      end
+    end
+  end
+
+  %% Measure stability within members of each bin (column in binnedXsq)
+  for ci=1:size(binnedXsq,2)
+    validRows = find(binnedXsq(:,ci,1) ~= -Inf);
+    % compute pairwise cluster distance
+    dist = pdist(squeeze(binnedXsq(validRows,ci,:)),'correlation');
+    binStability(exprmnti,ci) = rssq(dist)/length(dist);
+  end 
+    
 end
 
-
+%% Plot bin stability across trial length experiments
+figure('name','Binned Templates Stability');
+hold on;
+lgnd={};
+colors = lines;
+for tmplti=1:size(binnedXsq,2)
+  plot(squeeze(binStability(:,tmplti)),'-*', 'Color', colors(tmplti,:));
+  lgnd{end+1} = sprintf('Bin: %i',tmplti);
+end
+ylabel('Template Bin Stability');
+xlabel('Trial Length (sec)');
+set(gca,'XTick',1:length(trialLengths));
+set(gca,'XTickLabel',trialLengths);
+legend(lgnd);
+hold off;
 
 
 
