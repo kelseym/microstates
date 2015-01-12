@@ -77,10 +77,7 @@ set(gca, 'XTick', 1:numMicrostates);
 set(gca, 'XTickLabel', 1:numMicrostates);
 
 % Find sensors that exist in all scans
-sensorLabelIntersection = dataStructs{1}.label;
-for scni=2:length(dataStructs)
-  sensorLabelIntersection = intersect(sensorLabelIntersection, dataStructs{scni}.label);
-end
+sensorLabelIntersection = GetSensorLabelIntersection(dataStructs);
 
 % Match templates from remaining scans to ordered scan
 [a,b] = match_str(masterData.label, sensorLabelIntersection);

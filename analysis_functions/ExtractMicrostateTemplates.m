@@ -35,7 +35,7 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
   
   % concatenate trials if finding clusters using global or local option
   if strcmp(clusterTrainingStyle, 'global') || strcmp(clusterTrainingStyle, 'local')
-    for j=length(dataStructs)
+    for j=1:length(dataStructs)
       dataStructs{j} = ConcatenateTrials(dataStructs{j});
     end
   end
@@ -43,9 +43,11 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
   % Concatenate input data structures if using global option
   if strcmp(clusterTrainingStyle, 'global')
     dataMatrix = [];
-    for j=length(dataStructs)
+    labelIntersection = GetSensorLabelIntersection(dataStructs);
+    for j=1:length(dataStructs)
+      [lblIndcs,~] = match_str(dataStructs{j}.label, labelIntersection);
       for i=1:length(dataStructs{j}.trial);
-        dataMatrix = cat(2, dataMatrix, dataStructs{j}.trial{i});
+        dataMatrix = cat(2, dataMatrix, dataStructs{j}.trial{i}(lblIndcs,:));
       end
     end
     dataStructs = [];

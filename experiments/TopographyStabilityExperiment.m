@@ -7,56 +7,88 @@ plotTopo = 0;
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
-numMicrostates = 3;
-trialLengths = [5 10 20 30 40 50 60 70 80 90 100 110 120 130 140];
+numMicrostates = 4;
+trialLengths = [5:5:140];
+%trialLengths = [90];
 combinationThreshold = 1/numMicrostates;
-numMicrostateBins = 3;
+numMicrostateBins = 2;
 
-fileName = GetLocalDataFile();
-load(fileName);
+baseDir = GetLocalDataDirectory();
+fileNames = dir([baseDir '105923_MEG_*.mat']);
 
-cfg = [];
-cfg.continuous = 'yes';
-cfg.demean = 'yes';
-cfg.detrend = 'yes';
-cfg.bpfilter = 'yes';
-cfg.bpfreq = [1.0 40.0];
-data = ft_preprocessing(cfg, data);
-
-
-%% Open layout file
+% Open layout file
 cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 
+
+
+dataStructs = {};
+for fi=1:length(fileNames)
+
+  load([baseDir fileNames(fi).name]);
+  cfg = [];
+  cfg.continuous = 'yes';
+  cfg.demean = 'yes';
+  cfg.detrend = 'yes';
+  cfg.bpfilter = 'yes';
+  cfg.bpfreq = [1.0 40.0];
+  data = ft_preprocessing(cfg, data);
+  data = ConcatenateTrials(data);
+  data.filename = fileNames(fi).name;
+  dataStructs{fi} = data;
+  clear data;
+end
+
+% Keep only sensor data that is available in every scan
+labelIntersection = GetSensorLabelIntersection(dataStructs);
+for dsi=1:length(dataStructs)
+  [lblIndcs, ~] = match_str(dataStructs{dsi}.label, labelIntersection);
+  dataStructs{dsi}.label = labelIntersection;
+  dataStructs{dsi}.trial{:} = dataStructs{dsi}.trial{:}(lblIndcs,:);
+end
+
 %% compute microstates
-data = ConcatenateTrials(data);
 % compute global microstates
 cfg = [];
 cfg.numtemplates = numMicrostates;
-cfg.datastructs = data;
+cfg.datastructs = dataStructs;
 cfg.clustertrainingstyle = 'global';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
+if plotTopo
+  figure('name','Global Microstates');
+  for i=1:numMicrostates
+    subplot(1,numMicrostates,i);
+    PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),labelIntersection, lay);
+  end
+end
 
-% Compute trial-wise microstates
+%% Compute trial-wise microstates
 for exprmnti=1:length(trialLengths)
   trlLngth = trialLengths(exprmnti);
   cfg = [];
   cfg.length=trlLngth;
   cfg.overlap=0.0;
-  trialData = ft_redefinetrial(cfg, data);
-
+  
+  trialDataStructs = {};
+  for dti=1:length(dataStructs)
+    trialDataStructs{dti} = ft_redefinetrial(cfg, dataStructs{dti});
+  end
   cfg = [];
   cfg.numtemplates = numMicrostates;
-  cfg.datastructs = trialData;
+  cfg.datastructs = trialDataStructs;
   cfg.clustertrainingstyle = 'trial';
   microstateTemplates = ExtractMicrostateTemplates(cfg);
 
 
   % Combine all microstateTemplates for the purpose of template clustering
   X = [];
-  for i=1:length(microstateTemplates{1})
-    X = cat(1, X, microstateTemplates{1}{i});
+  for i=1:length(microstateTemplates) 
+    for j=1:length(microstateTemplates{i})
+      trialDataMatrix = microstateTemplates{i}{j};
+      [lblIndcs, ~] = match_str(dataStructs{i}.label, labelIntersection);
+      X = cat(1, X, trialDataMatrix(:,lblIndcs));
+    end
   end
 
   clusterId = ClusterTemplates(X, combinationThreshold);
@@ -83,7 +115,7 @@ for exprmnti=1:length(trialLengths)
         if ~isempty(tmpltIndx)
           subplot(rows,cols,eli);
           tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
-          PlotMicrostateTemplate(X(tmpltIndx2,:),trialData.label,lay);
+          PlotMicrostateTemplate(X(tmpltIndx2,:),labelIntersection,lay);
         end
       end
     end
@@ -139,7 +171,7 @@ for exprmnti=1:length(trialLengths)
     for ri=1:rows
       for ci=1:cols
         subplot(rows,cols,(ri-1)*cols+ci);
-        PlotMicrostateTemplate(squeeze(binnedXsq(ri,ci,:))',trialData.label,lay);
+        PlotMicrostateTemplate(squeeze(binnedXsq(ri,ci,:))',labelIntersection,lay);
       end
     end
   end
@@ -149,7 +181,8 @@ for exprmnti=1:length(trialLengths)
     validRows = find(binnedXsq(:,ci,1) ~= -Inf);
     % compute pairwise cluster distance
     dist = pdist(squeeze(binnedXsq(validRows,ci,:)),'correlation');
-    binStability(exprmnti,ci) = rssq(dist)/length(dist);
+    corr = (dist-1)*-1;
+    binStability(exprmnti,ci) = rssq(corr)/length(corr);
   end 
     
 end
