@@ -53,8 +53,9 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
     dataStructs = [];
     dataStructs{1}.trial{1} = dataMatrix;
   end
-
+  globalTemplates = {};
   for strctIndx=1:length(dataStructs)
+    localTemplates = {};
     for trlIndx=1:length(dataStructs{strctIndx}.trial)
       dataMatrix = dataStructs{strctIndx}.trial{trlIndx};
       % find gfp peaks

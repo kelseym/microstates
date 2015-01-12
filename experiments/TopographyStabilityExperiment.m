@@ -1,17 +1,17 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
-plotTopo = 0;
+plotTopo = 1;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
-numMicrostates = 4;
+numMicrostates = 3;
 trialLengths = [5:5:140];
-%trialLengths = [90];
+%trialLengths = [240];
 combinationThreshold = 1/numMicrostates;
-numMicrostateBins = 2;
+numMicrostateBins = 3;
 
 baseDir = GetLocalDataDirectory();
 fileNames = dir([baseDir '105923_MEG_*.mat']);
@@ -43,7 +43,7 @@ end
 % Keep only sensor data that is available in every scan
 labelIntersection = GetSensorLabelIntersection(dataStructs);
 for dsi=1:length(dataStructs)
-  [lblIndcs, ~] = match_str(dataStructs{dsi}.label, labelIntersection);
+  [~, lblIndcs] = match_str(labelIntersection, dataStructs{dsi}.label);
   dataStructs{dsi}.label = labelIntersection;
   dataStructs{dsi}.trial{:} = dataStructs{dsi}.trial{:}(lblIndcs,:);
 end
@@ -52,7 +52,7 @@ end
 % compute global microstates
 cfg = [];
 cfg.numtemplates = numMicrostates;
-cfg.datastructs = dataStructs;
+cfg.datastructs = dataStructs{1};
 cfg.clustertrainingstyle = 'global';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 if plotTopo
