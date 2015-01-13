@@ -1,17 +1,17 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
-plotTopo = 1;
+plotTopo = 0;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
-numMicrostates = 3;
-trialLengths = [5:5:140];
+numMicrostates = 5;
+trialLengths = [5:5:240];
 %trialLengths = [240];
 combinationThreshold = 1/numMicrostates;
-numMicrostateBins = 3;
+numMicrostateBins = 5;
 
 baseDir = GetLocalDataDirectory();
 fileNames = dir([baseDir '105923_MEG_*.mat']);
@@ -65,7 +65,7 @@ end
 
 %% Compute trial-wise microstates
 for exprmnti=1:length(trialLengths)
-  trlLngth = trialLengths(exprmnti);
+  trlLngth = trialLengths(exprmnti)
   cfg = [];
   cfg.length=trlLngth;
   cfg.overlap=0.0;
@@ -86,12 +86,11 @@ for exprmnti=1:length(trialLengths)
   for i=1:length(microstateTemplates) 
     for j=1:length(microstateTemplates{i})
       trialDataMatrix = microstateTemplates{i}{j};
-      [lblIndcs, ~] = match_str(dataStructs{i}.label, labelIntersection);
-      X = cat(1, X, trialDataMatrix(:,lblIndcs));
+      X = cat(1, X, trialDataMatrix);
     end
   end
 
-  clusterId = ClusterTemplates(X, combinationThreshold);
+  clusterId = ClusterTemplates(X, combinationThreshold, numMicrostateBins);
 
   clusterCount=[];
   for cid=1:length(unique(clusterId))
@@ -111,7 +110,7 @@ for exprmnti=1:length(trialLengths)
         eli = ((ri-1)*cols)+ci;
         clusterIdToPlot = clusterSortingI(ci);
         % if row ri contans clusterIdToPlot, plot it here
-        tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot);
+        tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot, 'first');
         if ~isempty(tmpltIndx)
           subplot(rows,cols,eli);
           tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
@@ -133,7 +132,7 @@ for exprmnti=1:length(trialLengths)
   for toCol=1:length(clusterSortingI)
     clstrId=clusterSortingI(toCol);
     for ri=1:size(Xsq,1)
-      fromCol = find(clusterIdSq(ri,:)==clstrId);
+      fromCol = find(clusterIdSq(ri,:)==clstrId, 'first');
       if ~isempty(fromCol)
         sortedXsq(ri,toCol,:) = Xsq(ri,fromCol,:);
       end

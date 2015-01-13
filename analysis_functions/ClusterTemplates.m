@@ -1,5 +1,5 @@
 
-function clusterId = ClusterTemplates(microstateTemplates, combinationThreshold)
+function clusterId = ClusterTemplates(microstateTemplates, combinationThreshold, minUniqueClusters)
   X = microstateTemplates;
   %% cluster analysis
   %  generate a distance array in the form of pdist() output
@@ -20,7 +20,7 @@ function clusterId = ClusterTemplates(microstateTemplates, combinationThreshold)
   clusterIDs = cluster(clustTree,'maxclust',1:size(X,1));
 
   % find cluster assignment (column in clusterIDs) that results in all cluster members correlated >= threshold
-  for numClusters=1:size(clusterIDs,2)
+  for numClusters=minUniqueClusters:size(clusterIDs,2)
     ids = clusterIDs(:,numClusters);
     minCoef = Inf;
     for clusterNum=unique(ids)'
