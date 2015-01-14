@@ -2,8 +2,8 @@
 clear;
 % load data
 fileName = GetLocalDataFile();
-maxNumMicroStates = 6;
-trialLength = 40;
+maxNumMicroStates = 10;
+trialLengths = [5,10,30,45,60,120,240];
 
 
 load(fileName);
@@ -42,24 +42,30 @@ set(gca, 'XGrid', 'on');
 xlim([1 maxNumMicroStates]);
 set(gca,'XTick',1:maxNumMicroStates);
 
-%% For each trial, plot GEV
-cfg = [];
-cfg.length=trialLength;
-cfg.overlap=0.0;
-data = ft_redefinetrial(cfg, data);
-
-for numMicrostates=1:maxNumMicroStates
+%% Compute trial GEV
+meanTrialGev = {};
+for i=1:length(trialLengths)
+  trlLngth=trialLengths(i);
+  %% For each trial, plot GEV
   cfg = [];
-  cfg.numtemplates = numMicrostates;
-  cfg.datastructs = data;
-  cfg.clustertrainingstyle = 'trial';
-  trialMicrostateTemplates = ExtractMicrostateTemplates(cfg);
-  for trli=1:length(data.trial)
-    microstateTemplates = trialMicrostateTemplates{1}{trli};
-    dataMatrix = data.trial{trli};
-    gevk = ComputeGlobalExplainedVariance(microstateTemplates, dataMatrix);
-    trialGev(trli, numMicrostates) = sum(gevk);
+  cfg.length=trlLngth;
+  cfg.overlap=0.0;
+  trlData = ft_redefinetrial(cfg, data);
+
+  for numMicrostates=1:maxNumMicroStates
+    cfg = [];
+    cfg.numtemplates = numMicrostates;
+    cfg.datastructs = trlData;
+    cfg.clustertrainingstyle = 'trial';
+    trialMicrostateTemplates = ExtractMicrostateTemplates(cfg);
+    for trli=1:length(trlData.trial)
+      microstateTemplates = trialMicrostateTemplates{1}{trli};
+      dataMatrix = trlData.trial{trli};
+      gevk = ComputeGlobalExplainedVariance(microstateTemplates, dataMatrix);
+      trialGev(trli, numMicrostates) = sum(gevk);
+    end
   end
+  meanTrialGev{i} = mean(trialGev,1);
 end
 
 %% Plot GEV
@@ -67,19 +73,19 @@ figure, hold on;
 title('Per Trial Template Quantity Selection');
 ylabel('GEV');
 xlabel('Number of Microstate Templates');
-plot(trialGev','-', 'LineWidth', 1);
 grid off;
 set(gca, 'XGrid', 'on');
 xlim([1 maxNumMicroStates]);
 set(gca,'XTick',1:maxNumMicroStates);
 lgnd = {};
-for i=1:length(data.trial)
-  lgnd{end+1}=sprintf('%i',i);
-end
-legend(lgnd);
-plot(mean(trialGev),'k-*','LineWidth',2,'MarkerSize', 15);
-
 
 plot(gev,'b-', 'LineWidth', 3);
-
+lgnd{end+1} = 'Global';
+hold on;
+for i=1:length(trialLengths)
+  trlLngth=trialLengths(i);
+  plot(meanTrialGev{i}','-', 'LineWidth', 1);
+  lgnd{end+1}=sprintf('%i sec trials',trialLengths(i));
+end
+legend(lgnd);
 

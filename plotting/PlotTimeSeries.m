@@ -8,7 +8,7 @@ function fh = PlotTimeSeries(data, startS, endS, plotTitle)
   fh = figure;
   title(plotTitle);
   xlabel('Seconds');
-  ylabel('Sensor Potential');
+  ylabel('Sensor Amplitude');
   set(gca, 'YTickLabel', '');
   hold on;
   dataRaw = data.trial{1}(:,pltSmpls);

@@ -1,20 +1,20 @@
 %% Given a set of microstate templates, cluster templates to find close relatives and outliers
 
 clear;
-plotTopo = 0;
+plotTopo = 1;
 
 % Use custom subplot to reduce plot border thickness
 %                                  gap:[height width] fig border:[bottom top]
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
-numMicrostates = 5;
-trialLengths = [5:5:240];
-%trialLengths = [240];
+numMicrostates = 3;
+numMicrostateBins = 3;
+trialLengths = [5 10:10:240];
+%trialLengths = [130];
 combinationThreshold = 1/numMicrostates;
-numMicrostateBins = 5;
 
 baseDir = GetLocalDataDirectory();
-fileNames = dir([baseDir '105923_MEG_*.mat']);
+fileNames = dir([baseDir '105923*.mat']);
 
 % Open layout file
 cfg = [];
@@ -53,7 +53,7 @@ end
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = dataStructs{1};
-cfg.clustertrainingstyle = 'global';
+cfg.clustertrainingstyle = 'local';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
 if plotTopo
   figure('name','Global Microstates');
@@ -110,7 +110,7 @@ for exprmnti=1:length(trialLengths)
         eli = ((ri-1)*cols)+ci;
         clusterIdToPlot = clusterSortingI(ci);
         % if row ri contans clusterIdToPlot, plot it here
-        tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot, 'first');
+        tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot, 1, 'first');
         if ~isempty(tmpltIndx)
           subplot(rows,cols,eli);
           tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
@@ -132,7 +132,7 @@ for exprmnti=1:length(trialLengths)
   for toCol=1:length(clusterSortingI)
     clstrId=clusterSortingI(toCol);
     for ri=1:size(Xsq,1)
-      fromCol = find(clusterIdSq(ri,:)==clstrId, 'first');
+      fromCol = find(clusterIdSq(ri,:)==clstrId, 1, 'first');
       if ~isempty(fromCol)
         sortedXsq(ri,toCol,:) = Xsq(ri,fromCol,:);
       end
@@ -181,7 +181,7 @@ for exprmnti=1:length(trialLengths)
     % compute pairwise cluster distance
     dist = pdist(squeeze(binnedXsq(validRows,ci,:)),'correlation');
     corr = (dist-1)*-1;
-    binStability(exprmnti,ci) = rssq(corr)/length(corr);
+    binStability(exprmnti,ci) = sum(corr)/length(corr);
   end 
     
 end
@@ -192,7 +192,7 @@ hold on;
 lgnd={};
 colors = lines;
 for tmplti=1:size(binnedXsq,2)
-  plot(squeeze(binStability(:,tmplti)),'-*', 'Color', colors(tmplti,:));
+  plot(squeeze(binStability(:,tmplti)),'.', 'MarkerSize', 30, 'Color', colors(tmplti,:));
   lgnd{end+1} = sprintf('Bin: %i',tmplti);
 end
 ylabel('Template Bin Stability');

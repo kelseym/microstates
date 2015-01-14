@@ -1,7 +1,7 @@
 %% Extract microstate parameters from MEG scans
 clear;
 
-numMicrostates = 4;
+numMicrostates = 3;
 fileName = GetLocalDataFile();
 
 
@@ -20,8 +20,26 @@ cfg.bpfilter = 'yes';
 cfg.bpfreq = [1.0 40.0];
 data = ft_preprocessing(cfg, data);
 
+data = ConcatenateTrials(data);
+
 %% Plot time series
-PlotTimeSeries(data, 0, 2, '');
+PlotTimeSeries(data, 0, 5, '');
+
+%% Plot GFP
+[gfp, gfpPkLocs] = LocateGfpPeaks(data.trial{1});
+startS = 0;
+endS = 5;
+pltSmpls = startS*data.fsample:endS*data.fsample;
+pltSmpls = floor(pltSmpls)+1;
+figure;
+plot(data.time{1}(pltSmpls), gfp(pltSmpls),'b');
+title(['Global Field Power']);
+xlabel('Time (s)');
+ylabel('GFP');
+hold on;
+pltPksIndx = gfpPkLocs(gfpPkLocs<(5*data.fsample));
+plot(data.time{1}(pltPksIndx), gfp(pltPksIndx),'r.');
+
 
 %% extract N microstate templates
 
@@ -72,8 +90,8 @@ end
 %% Plot microstate sequence
 cfg = [];
 cfg.trialindex = 1;
-cfg.starttime = 1;
-cfg.endtime = 4;
+cfg.starttime = 0;
+cfg.endtime = 5;
 PlotMicrostateSequence(dataStructs{1}, cfg);
 
 %% Plot microstate features
