@@ -5,7 +5,9 @@
 %  Input:
 %  cfg.maxcluster = intValue, integer value denoting the number of clusters to find
 %  cfg.sensordata = SxM double matrix, where S=number_of_sensors and M=number_of_data_points
+%          NOTE: sensordata should only include timepoints of interest for clustering, e.g. data at gfp peaks
 %  cfg.clustermethod = 'kmeans', 'hierarchical', 'aahc', 'taahc'
+%  cfg.gfppeakvalues = 1xM array containing gfp values at points corresponding to samples in sensordata. Required for aahc method
 
 %  Return:
 %  cfg.clusterassignment = 1XM matrix populated with integers identifying the cluster membership of each data point
@@ -27,10 +29,18 @@ function cfg = ClusterSensorData(cfg)
   sensorData = ft_getopt(cfg, 'sensordata');
   clusterMethod = ft_getopt(cfg, 'clustermethod');
   
+  % dependent options
+  if strcmp(clusterMethod, 'aahc')
+    cfg = ft_checkconfig(cfg, 'required', {'gfppeakvalues'});
+    cfg = ft_checkopt(cfg, 'gfppeakvalues', 'double');
+    gpfPeakValues = ft_getopt(cfg, 'gfppeakvalues');
+  end
   
-  %% T-AAHC computation
-  %  
-  %  1. Group unmatched data points 
+  %% AAHC computation
+  %  1. Measure GEV of each cluster - initially each point is a cluster
+  %  2. Atomize cluster with minimum GEV
+  %  2a. Each point in atomized cluster is reassigned to a remaining cluster to which it is most highly correlated
+  %  3. Stop if target number of clusters has been reached, otherwise, goto 1.
   
   
   
