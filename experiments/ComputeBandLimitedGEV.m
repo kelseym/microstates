@@ -5,8 +5,8 @@ fileName = GetLocalDataFile();
 
 maxNumMicroStates = 10;
 maxFreq = 100;
-bands =       [1,50;       1,4;    4,7;   7,13;    13,30; 30,50];
-bandLabels = {'Broadband','Delta','Theta','Alpha','Beta','LowGamma','HighGamma'};
+bands =       [1,50;  1,100;  1,4;    4,7;    7,13;   13,30; 30,50;    50,100];
+bandLabels = {'1-50','1-100','Delta','Theta','Alpha','Beta','LowGamma','HighGamma'};
 %bands =       [1 100; 50 100];
 %bandLabels = {'1-100', '50-100'};
 colors = lines();
