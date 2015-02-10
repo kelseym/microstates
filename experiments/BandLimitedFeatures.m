@@ -5,8 +5,9 @@ fileName = GetLocalDataFile();
 
 numMicrostates = 3;
 maxFreq = 240;
-bands =       [1,50;  1,100;  1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
-bandLabels = {'1-50','1-100','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
+frequencyBands = GetFrequencyBands();
+bands =       frequencyBands.bands;
+bandLabels =  frequencyBands.bandLabels;
 % bands =       [1,50; 1,4];
 % bandLabels = {'1-50', '1-4'};
 

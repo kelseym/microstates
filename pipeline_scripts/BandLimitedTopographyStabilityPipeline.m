@@ -1,34 +1,49 @@
-%% Given a set of microstate templates, cluster templates to find close relatives and outliers
+% Pipeline should be contructed to run in a non-interactive environment
+% Options should be passed using the following workspace variables:
 
-clear;
-plotTopo = 0;
+% filename = string containing full path to data file. Can also be a list of filenames (several for same subject)
+% numMicrostates = integer specifying the number of microstate clusters to find
+% outputDir = string containing full path to the output directory
 
-% Use custom subplot to reduce plot border thickness
-%                                  gap:[height width] fig border:[bottom top]
-%subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
+if ~exist(filename, 'var') 
+  error('Missing input parameter: filename')
+elseif ~exist(numMicrostates, 'var')
+  error('Missing input parameter: numMicrostates')
+elseif ~exist(outputDir, 'var')
+  error('Missing input parameter: outputDir')
+end
 
-freqBand = [1, 40];
-numMicrostates = 4;
-numMicrostateBins = 4;
+
+% plotTopo = 0;
+
+% setup frequency partitions
+% downsample data to 2x max frequency
+frequencyBands = GetFrequencyBands();
+bands =       frequencyBands.bands;
+bandLabels =  frequencyBands.bandLabels;
+maxFreq = max(max(bands))*2;
+
+% setup time partitions
+numMicrostateBins = numMicrostates;
 trialLengths = [5 10:10:240];
-%trialLengths = [130];
-combinationThreshold = 1/numMicrostates;
-
-baseDir = GetLocalDataDirectory();
-fileNames = dir([baseDir '105923*.mat']);
-outputDir = GetLocalOutputDirectory();
 
 % Open layout file
 cfg = [];
 cfg.layout = '4D248.mat';
 lay = ft_prepare_layout(cfg);
 
+% template corrilation combination threshold
+combinationThreshold = 1/numMicrostates;
 
+% if filename specifies a single file, force it into cell-array format
+if ischar(filename)
+  filename = {filename};
+end
 
-dataStructs = {};
-for fi=1:length(fileNames)
-
-  load([baseDir fileNames(fi).name]);
+% open and preprocess specified data files
+dataStructs = cell(length(filename),1);
+for fi=1:length(fileName)
+  load(filename);
   cfg = [];
   cfg.continuous = 'yes';
   cfg.demean = 'yes';
@@ -37,7 +52,7 @@ for fi=1:length(fileNames)
   cfg.bpfreq = freqBand;
   data = ft_preprocessing(cfg, data);
   data = ConcatenateTrials(data);
-  data.filename = fileNames(fi).name;
+  data.filename = filename{fi};
   dataStructs{fi} = data;
   clear data;
 end
@@ -50,20 +65,19 @@ for dsi=1:length(dataStructs)
   dataStructs{dsi}.trial{:} = dataStructs{dsi}.trial{:}(lblIndcs,:);
 end
 
-%% compute microstates
-% compute global microstates
+%% compute global(inter-scan) microstates
 cfg = [];
 cfg.numtemplates = numMicrostates;
 cfg.datastructs = dataStructs{1};
 cfg.clustertrainingstyle = 'local';
 globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
-if plotTopo
-  figure('name','Global Microstates');
-  for i=1:numMicrostates
-    subplot(1,numMicrostates,i);
-    PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),labelIntersection, lay);
-  end
-end
+% if plotTopo
+%   figure('name','Global Microstates');
+%   for i=1:numMicrostates
+%     subplot(1,numMicrostates,i);
+%     PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),labelIntersection, lay);
+%   end
+% end
 
 %% Compute trial-wise microstates
 for exprmnti=1:length(trialLengths)
@@ -102,25 +116,25 @@ for exprmnti=1:length(trialLengths)
   clusterIdSq = reshape(clusterId,numMicrostates,[])';
   
   %% Plot templates aligned by clusterID
-  if plotTopo
-    rows = size(X,1)/numMicrostates;
-    cols = length(unique(clusterId));
-    % plot clusters with the most members first (left)
-    figure('name',sprintf('%i repeating out of %i distinct microstates', length(find(clusterCount>1)),length(unique(clusterId))));
-    for ri=1:rows
-      for ci=1:cols
-        eli = ((ri-1)*cols)+ci;
-        clusterIdToPlot = clusterSortingI(ci);
-        % if row ri contans clusterIdToPlot, plot it here
-        tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot, 1, 'first');
-        if ~isempty(tmpltIndx)
-          subplot(rows,cols,eli);
-          tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
-          PlotMicrostateTemplate(X(tmpltIndx2,:),labelIntersection,lay);
-        end
-      end
-    end
-  end
+%   if plotTopo
+%     rows = size(X,1)/numMicrostates;
+%     cols = length(unique(clusterId));
+%     % plot clusters with the most members first (left)
+%     figure('name',sprintf('%i repeating out of %i distinct microstates', length(find(clusterCount>1)),length(unique(clusterId))));
+%     for ri=1:rows
+%       for ci=1:cols
+%         eli = ((ri-1)*cols)+ci;
+%         clusterIdToPlot = clusterSortingI(ci);
+%         % if row ri contans clusterIdToPlot, plot it here
+%         tmpltIndx = find(clusterIdSq(ri,:)==clusterIdToPlot, 1, 'first');
+%         if ~isempty(tmpltIndx)
+%           subplot(rows,cols,eli);
+%           tmpltIndx2 = ((ri-1)*numMicrostates)+tmpltIndx;
+%           PlotMicrostateTemplate(X(tmpltIndx2,:),labelIntersection,lay);
+%         end
+%       end
+%     end
+%   end
   
   %% Force topographies into numMicrostates groups
   numTrials = size(clusterIdSq,1);
@@ -165,17 +179,17 @@ for exprmnti=1:length(trialLengths)
   end
   
   % Plot binned topographies
-  if plotTopo
-    figure('name',sprintf('Trial Length: %i sec',trlLngth));
-    rows = size(binnedXsq,1);
-    cols = size(binnedXsq,2);
-    for ri=1:rows
-      for ci=1:cols
-        subplot(rows,cols,(ri-1)*cols+ci);
-        PlotMicrostateTemplate(squeeze(binnedXsq(ri,ci,:))',labelIntersection,lay);
-      end
-    end
-  end
+%   if plotTopo
+%     figure('name',sprintf('Trial Length: %i sec',trlLngth));
+%     rows = size(binnedXsq,1);
+%     cols = size(binnedXsq,2);
+%     for ri=1:rows
+%       for ci=1:cols
+%         subplot(rows,cols,(ri-1)*cols+ci);
+%         PlotMicrostateTemplate(squeeze(binnedXsq(ri,ci,:))',labelIntersection,lay);
+%       end
+%     end
+%   end
 
   %% Measure stability within members of each bin (column in binnedXsq)
   for ci=1:size(binnedXsq,2)
