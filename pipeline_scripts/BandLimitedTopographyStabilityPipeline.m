@@ -6,13 +6,13 @@
 % numMicrostates = integer specifying the number of microstate clusters to find
 % outputDir = string containing full path to the output directory
 
-if ~exist(subjectid, 'var') 
+if ~exist('subjectid', 'var') 
   error('Missing input parameter: subjectid')
-elseif ~exist(filename, 'var') 
+elseif ~exist('filename', 'var') 
   error('Missing input parameter: filename')
-elseif ~exist(numMicrostates, 'var')
+elseif ~exist('numMicrostates', 'var')
   error('Missing input parameter: numMicrostates')
-elseif ~exist(outputDir, 'var')
+elseif ~exist('outputDir', 'var')
   error('Missing input parameter: outputDir')
 end
 
@@ -45,8 +45,8 @@ end
 
 % open and preprocess specified data files
 rawDataStructs = cell(length(filename),1);
-for fi=1:length(fileName)
-  load(filename);
+for fi=1:length(filename)
+  load(filename{fi});
   cfg = [];
   cfg.continuous = 'yes';
   cfg.demean = 'yes';
@@ -85,13 +85,19 @@ for bndi=1:size(bands,1)
   cfg.datastructs = dataStructs{1};
   cfg.clustertrainingstyle = 'local';
   globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
-  % if plotTopo
-  %   figure('name','Global Microstates');
-  %   for i=1:numMicrostates
-  %     subplot(1,numMicrostates,i);
-  %     PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),labelIntersection, lay);
-  %   end
-  % end
+
+  fh = figure('name','Global Microstates');
+  for i=1:numMicrostates
+    subplot(1,numMicrostates,i);
+    PlotMicrostateTemplate(globalMicrostateTemplates{1}{1}(i,:),labelIntersection, lay);
+  end
+  
+  % save global microstates and plots
+  save([outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_globalMicrostateTemplates_' frequencyBands.bandLabels{bndi} '.mat'], 'binStability', 'frequencyBands', 'trialLengths');
+
+  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'fig');
+  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'png');
+  close all;
 
 
   % Compute trial-wise microstates
@@ -218,24 +224,31 @@ for bndi=1:size(bands,1)
 end
 
 % save binStability with freqBands and trial lengths
-save([outputDir filesep subjectid '_binnedStability.mat'], 'binnedStability', 'frequencyBands', 'trialLengths');
+save([outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_binStability.mat'], 'binStability', 'frequencyBands', 'trialLengths');
 
-% %% Plot bin stability across trial length experiments
-% figure('name','Binned Templates Stability');
-% hold on;
-% lgnd={};
-% colors = lines;
-% for tmplti=1:size(binnedXsq,2)
-%   plot(squeeze(binStability(:,tmplti)),'.', 'MarkerSize', 30, 'Color', colors(tmplti,:));
-%   lgnd{end+1} = sprintf('Bin: %i',tmplti);
-% end
-% ylabel('Template Bin Stability');
-% xlabel('Trial Length (sec)');
-% set(gca,'XTick',1:length(trialLengths));
-% set(gca,'XTickLabel',trialLengths);
-% legend(lgnd);
-% hold off;
-% 
+%% Plot bin stability across trial length experiments
+for bndi=1:size(binStability,1)
+  fh = figure('name','Binned Templates Stability');
+  hold on;
+  lgnd={};
+  colors = lines;
+  for tmplti=1:size(binStability,3)
+    plot(squeeze(binStability(bndi,:,tmplti)),'.', 'MarkerSize', 30, 'Color', colors(tmplti,:));
+    lgnd{end+1} = sprintf('Bin: %i',tmplti);
+  end
+  title(sprintf('%s Band Limited',frequencyBands.bandLabels{bndi}));
+  ylabel('Template Bin Stability');
+  ylim([-1 1]);
+  xlabel('Trial Length (sec)');
+  set(gca,'XTick',1:length(trialLengths));
+  set(gca,'XTickLabel',trialLengths);
+  legend(lgnd, 'Location', 'SouthWest');
+  hold off;
+  
+  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'fig');
+  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'png');
+  close all;
+end
 
 
 
