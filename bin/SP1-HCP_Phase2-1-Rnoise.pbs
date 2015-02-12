@@ -1,0 +1,64 @@
+#!/bin/bash
+#------------------------------
+# SET ENVIRONMENT VARIABLES NEEDED FOR SUBSEQUENT SCRIPT
+MCRDIR="/export/matlab/MCR/R2012b/v80"     # This is the directory where Matlab MCR libraries are located 
+GITREP="/home/kelseym/matlab/megconnectome"     # This is the directory where the github code repository is located 
+BINEXECDIR="/home/kelseym/matlab/megconnectome/bin"       # This is the directory where the megconnectome.sh and megconnectome executables are located. This is specified exmplicitely in order to facilitate running compiled versions different from the ones in github repository. If you want to run the one from github then just replace with BINEXECDIR="$GITREP/bin"  
+ADDPATH="$GITREP/template"     # This variable contains all the directories to be added in the matlab path at the beginnning of each pipeline.  
+LOCALDBSUBJDIR="/HCP/scratch/meg/intradb/archive1/HCP_Phase2/arc001/$EXPERIMENTID"     # This is the directory where the Scans and RESOURCES directories for the current subject are located. The individual scan directories within the Scans directory must be in the full naming convention i.e. 6-Wrkmem.   
+
+FILENAME="$LOCALDBSUBJDIR/Scans/1-Rnoise/4D/c,rfDC"
+echo processing $FILENAME
+
+# file path should look like this: /HCP/BlueArc/meg_scratch/intradb/archive1/HCP_Phase2/arc001/177746_MEG/Scans/1-Rnoise/4D/c,rfDC
+
+# CP250427_MEG
+EXPERIMENTID=`echo $FILENAME | cut -d '/' -f 9`
+# 250427
+SUBJECTID=`echo $EXPERIMENTID | cut -d '_' -f 1`
+# 1-Rnoise
+SCANID=`echo $FILENAME | cut -d '/' -f 11`
+
+echo
+echo "EXPERIMENTID =" $EXPERIMENTID
+echo "SUBJECTID    =" $SUBJECTID
+echo "SCANID       =" $SCANID
+
+#------------------------------
+# CODE THAT FINDS AVAILABLE Xvfb PORT AND STARTS THE VIRTUAL BUFFER
+xPort=0;
+tmpPort=0;
+Xfiles=/tmp/.X*-lock
+doneFlag=0;
+while [ $doneFlag -ne 1 ]
+do
+        for f in $Xfiles
+        do
+                tmpPort=$(echo "$f" | awk -F"X" '{print $2}' | awk -F"-" '{print $1}');
+                if [[ "$tmpPort" == "$xPort" ]]
+                then
+                    xPort=$((xPort+1));
+                    doneFlag=0;
+                    break;
+                else
+                    doneFlag=1;
+                fi
+        done
+done
+Xvfb :$xPort -screen 0  2760x1960x16 &
+export curPID=$!
+export DISPLAY=:$xPort
+#------------------------------
+#------------------------------
+#RUN DATACHECK ANALYSIS SCRIPT 
+ echo " Starting DATACHECK pipeline " 
+ echo " ======================================================= " 
+sh $BINEXECDIR/megconnectome.sh $MCRDIR  $GITREP/pipeline_scripts/hcp_datacheck.m --pipelinedatadir $LOCALDBSUBJDIR/RESOURCES/analysis --filename $FILENAME --subjectid $SUBJECTID --experimentid $EXPERIMENTID --scanid $SCANID --path $ADDPATH
+#------------------------------
+#RUN BADDATA ANALYSIS SCRIPT 
+ echo " Starting BADDATA pipeline " 
+ echo " ======================================================= " 
+sh $BINEXECDIR/megconnectome.sh $MCRDIR  $GITREP/pipeline_scripts/hcp_baddata.m --pipelinedatadir $LOCALDBSUBJDIR/RESOURCES/analysis --filename $FILENAME --subjectid $SUBJECTID --experimentid $EXPERIMENTID --scanid $SCANID --path $ADDPATH
+#------------------------------
+#CLOSE VIRTUAL BUFFER 
+kill $curPID

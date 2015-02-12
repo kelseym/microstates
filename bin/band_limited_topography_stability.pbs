@@ -1,0 +1,51 @@
+#!/bin/bash
+#------------------------------
+# SET ENVIRONMENT VARIABLES NEEDED FOR SUBSEQUENT SCRIPT
+MCRDIR="/export/matlab/MCR/R2012b/v80"     # This is the directory where Matlab MCR libraries are located 
+BINEXECDIR="/home/kelseym/eon_microstates/bin"       # This is the directory where the megconnectome.sh and megconnectome executables are located. 
+ADDPATH="/home/kelseym/eon_microstates/template"     # This variable contains all the directories to be added in the matlab path at the beginnning of each pipeline.  
+LOCALDBSUBJDIR="/BlueArc-scratch/kelseym/MEG_20_Subjects/hcp_microstate_data_restin"     # This is the directory containing MEG data to be processed
+
+
+
+echo
+echo "EXPERIMENTID =" $EXPERIMENTID
+echo "SUBJECTID    =" $SUBJECTID
+echo "SCANID       =" $SCANID
+
+#------------------------------
+# CODE THAT FINDS AVAILABLE Xvfb PORT AND STARTS THE VIRTUAL BUFFER
+xPort=0;
+tmpPort=0;
+Xfiles=/tmp/.X*-lock
+doneFlag=0;
+while [ $doneFlag -ne 1 ]
+do
+        for f in $Xfiles
+        do
+                tmpPort=$(echo "$f" | awk -F"X" '{print $2}' | awk -F"-" '{print $1}');
+                if [[ "$tmpPort" == "$xPort" ]]
+                then
+                    xPort=$((xPort+1));
+                    doneFlag=0;
+                    break;
+                else
+                    doneFlag=1;
+                fi
+        done
+done
+
+#-- setup frame buffer to support figure generation
+Xvfb :$xPort -screen 0  2760x1960x16 &
+export curPID=$!
+export DISPLAY=:$xPort
+
+#------------------------------
+#------------------------------
+#RUN PIPELINE SCRIPT 
+ echo " Starting pipeline " 
+ echo " ======================================================= " 
+sh $BINEXECDIR/megconnectome.sh $MCRDIR  $GITREP/pipeline_scripts/hcp_datacheck.m --pipelinedatadir $LOCALDBSUBJDIR/RESOURCES/analysis --filename $FILENAME --subjectid $SUBJECTID --experimentid $EXPERIMENTID --scanid $SCANID --path $ADDPATH
+#------------------------------
+#CLOSE VIRTUAL BUFFER 
+kill $curPID
