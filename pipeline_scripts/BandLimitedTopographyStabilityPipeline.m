@@ -259,9 +259,10 @@ for bndi=1:size(binStability,1)
   
   saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'fig');
   saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'png');
-  close all;
+  close(fh);
 end
 
+close all;
 
 
 
