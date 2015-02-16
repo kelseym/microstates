@@ -16,6 +16,11 @@ elseif ~exist('outputDir', 'var')
   error('Missing input parameter: outputDir')
 end
 
+% Print variables to output
+subjectid
+filename
+numMicrostates
+outputDir
 
 % plotTopo = 0;
 
@@ -93,10 +98,10 @@ for bndi=1:size(bands,1)
   end
   
   % save global microstates and plots
-  save([outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_globalMicrostateTemplates_' frequencyBands.bandLabels{bndi} '.mat'], 'binStability', 'frequencyBands', 'trialLengths');
+  save([outputDir filesep sprintf('%i_%i',subjectid, numMicrostates) 'MS' '_globalMicrostateTemplates_' frequencyBands.bandLabels{bndi} '.mat'], 'globalMicrostateTemplates', 'labelIntersection', 'lay');
 
-  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'fig');
-  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'png');
+  saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'fig');
+  saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_GlobalMicrostates_' frequencyBands.bandLabels{bndi}],'png');
   close all;
 
 
@@ -224,7 +229,7 @@ for bndi=1:size(bands,1)
 end
 
 % save binStability with freqBands and trial lengths
-save([outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_binStability.mat'], 'binStability', 'frequencyBands', 'trialLengths');
+save([outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_binStability.mat'], 'binStability', 'frequencyBands', 'trialLengths');
 
 %% Plot bin stability across trial length experiments
 for bndi=1:size(binStability,1)
@@ -245,8 +250,8 @@ for bndi=1:size(binStability,1)
   legend(lgnd, 'Location', 'SouthWest');
   hold off;
   
-  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'fig');
-  saveas(fh, [outputDir filesep subjectid '_' sprintf('%i',numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'png');
+  saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'fig');
+  saveas(fh, [outputDir filesep sprintf('%i_%i', subjectid, numMicrostates) 'MS' '_BinnedTemplatesStability_' frequencyBands.bandLabels{bndi}],'png');
   close all;
 end
 
