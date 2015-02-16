@@ -11,8 +11,9 @@
           % global - concatenate all data to determin cluster centers
           % local - concatenate all trials in each data structure (data file) to find unique cluster centers for each
           % trial - find unique cluster centers for each trial individually
+%  cfg.clustermethod = 'heiarchal', 'aahc'
 
-
+          
 function globalTemplates = ExtractMicrostateTemplates(cfg)
 
   % ensure that the required options are present
@@ -32,6 +33,8 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
   if isstruct(dataStructs)
     dataStructs = {dataStructs};
   end
+  
+  fsample = dataStructs{1}.fsample;
   
   % concatenate trials if finding clusters using global or local option
   if strcmp(clusterTrainingStyle, 'global') || strcmp(clusterTrainingStyle, 'local')
@@ -63,10 +66,7 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
       % sample sensor data at gfp peaks
       trainingMaps = dataMatrix(:,gfpPkLocs)';
       % cluster analysis
-      distTree = pdist(trainingMaps, 'correlation');
-      clustTree = linkage(distTree, 'average');
-      % choose N clusters, assign sample points to 1 of N microstates
-      sampleMapMembership = cluster(clustTree,'maxclust',numTemplates);
+      sampleMapMembership = AAHC(trainingMaps, numTemplates);
       % find cluster centroids
       trialTemplates = zeros(numTemplates, size(trainingMaps,2));
       for i=1:numTemplates
@@ -78,5 +78,5 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
     globalTemplates{strctIndx} = localTemplates;
   end
   
-  
 end
+

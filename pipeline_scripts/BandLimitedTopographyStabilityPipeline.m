@@ -6,13 +6,6 @@
 % numMicrostates = integer specifying the number of microstate clusters to find
 % outputDir = string containing full path to the output directory
 
-% allow the user to specify the path where additional data is present, e.g. the channel layout or anatomy files
-if exist('path', 'var')
-    addpath(path)
-end
-
-
-
 if ~exist('subjectid', 'var') 
   error('Missing input parameter: subjectid')
 elseif ~exist('filename', 'var') 
