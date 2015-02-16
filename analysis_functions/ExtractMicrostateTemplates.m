@@ -62,7 +62,7 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
     for trlIndx=1:length(dataStructs{strctIndx}.trial)
       dataMatrix = dataStructs{strctIndx}.trial{trlIndx};
       % find gfp peaks
-      [~, gfpPkLocs] = LocateGfpPeaks(dataMatrix, 30*fsample, 1);
+      [~, gfpPkLocs] = LocateGfpPeaks(dataMatrix);
       % sample sensor data at gfp peaks
       trainingMaps = dataMatrix(:,gfpPkLocs)';
       % cluster analysis
