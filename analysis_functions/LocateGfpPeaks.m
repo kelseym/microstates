@@ -1,7 +1,8 @@
 % Compute GFP and peaks
 %  Optionally, ignore peaks within N std dev of the mean within some window centered at each peak
-%   Use windowLength of ~ or 0 to report all peaks
-function [gfp, gfpPkLocs] = LocateGfpPeaks(dataMatrix, windowLength, stdDevFactor)
+%   WindowSize is given in number of samples
+%   Use windowSize of ~ or 0 to report all peaks
+function [gfp, gfpPkLocs] = LocateGfpPeaks(dataMatrix, windowSize, stdDevFactor)
   numChan = size(dataMatrix,2);
   dataSize = size(dataMatrix,2);
 
@@ -10,10 +11,9 @@ function [gfp, gfpPkLocs] = LocateGfpPeaks(dataMatrix, windowLength, stdDevFacto
 
   %% Find local maxima
   [gfpPks, gfpPkLocs] = findpeaks(gfp,'MINPEAKDISTANCE',3);
-  if exist('windowLength', 'var') && windowLength > 0
+  if exist('windowSize', 'var') && windowSize > 0
     % Report only peaks greater than N std dev from the mean (in sliding window about peak under consideration)
     %  computed over a N second sliding window at M second intervals
-    windowSize = windowLength*data.fsample;
     bigPksLoc = [];
     for pki=1:length(gfpPks)
       wndwStrtIdx = gfpPkLocs(pki)+1-round(windowSize/2);
