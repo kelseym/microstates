@@ -66,7 +66,7 @@ function globalTemplates = ExtractMicrostateTemplates(cfg)
       % sample sensor data at gfp peaks
       trainingMaps = dataMatrix(:,gfpPkLocs)';
       % cluster analysis
-      sampleMapMembership = AAHC(trainingMaps, numTemplates);
+      sampleMapMembership = HierarchicalCluster(trainingMaps, numTemplates);
       % find cluster centroids
       trialTemplates = zeros(numTemplates, size(trainingMaps,2));
       for i=1:numTemplates

@@ -1,15 +1,15 @@
-%% compute global explained variance of a microstate template set
+%% compute templates and metrics on band limited data and envelopes
 clear;
 % load data
 fileName = GetLocalDataFile();
 
 numMicrostates = 3;
 maxFreq = 120;
-frequencyBands = GetFrequencyBands();
-bands =       frequencyBands.bands;
-bandLabels =  frequencyBands.bandLabels;
-% bands =       [1,50; 1,4];
-% bandLabels = {'1-50', '1-4'};
+% frequencyBands = GetFrequencyBands();
+% bands =       frequencyBands.bands;
+% bandLabels =  frequencyBands.bandLabels;
+bands =       [1,50;       1,120;     35,50;     50,76;      76,120];
+bandLabels = {'Broadband','Fullband','GammaLow','GammaMid', 'GammaHigh'};
 
 load(fileName);
 data = ConcatenateTrials(data);
