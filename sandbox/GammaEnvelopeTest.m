@@ -13,19 +13,18 @@ bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaH
 
 load(fileName);
 data = ConcatenateTrials(data);
-cfg = [];
-cfg.resamplefs = maxFreq*2;
-cfg.detrend    = 'yes';
-cfg.demean     = 'yes';
-cfg.feedback   = 'no';
-cfg.trials     = 'all';
-cfg.continuous = 'yes';
-
 
 fh1 = figure;
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
 
+  cfg = [];
+  cfg.resamplefs = maxFreq*2;
+  cfg.detrend    = 'yes';
+  cfg.demean     = 'yes';
+  cfg.feedback   = 'no';
+  cfg.trials     = 'all';
+  cfg.continuous = 'yes';
   cfg.bpfilter = 'yes';
   cfg.bpfreq = band;
   if strfind(bandLabels{bndi},'Env')

@@ -13,19 +13,19 @@ colors = lines();
 
 load(fileName);
 data = ConcatenateTrials(data);
-cfg = [];
-cfg.resamplefs = maxFreq*2;
-cfg.detrend    = 'yes';
-cfg.demean     = 'yes';
-cfg.feedback   = 'no';
-cfg.trials     = 'all';
-cfg.continuous = 'yes';
 
 gev = zeros(size(bands,1),maxNumMicroStates);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
   bandLabels{bndi}
 
+  cfg = [];
+  cfg.resamplefs = maxFreq*2;
+  cfg.detrend    = 'yes';
+  cfg.demean     = 'yes';
+  cfg.feedback   = 'no';
+  cfg.trials     = 'all';
+  cfg.continuous = 'yes';
   cfg.bpfilter = 'yes';
   cfg.bpfreq = band;
   if strfind(bandLabels{bndi},'Env')
