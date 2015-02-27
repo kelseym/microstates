@@ -3,7 +3,7 @@ clear;
 % load data
 fileName = GetLocalDataFile();
 
-numMicrostates = 3;
+numMicrostates = 4;
 maxFreq = 120;
 % frequencyBands = GetFrequencyBands();
 % bands =       frequencyBands.bands;
@@ -15,6 +15,7 @@ load(fileName);
 data = ConcatenateTrials(data);
 
 fh1 = figure;
+fh2 = figure;
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
 
@@ -31,7 +32,17 @@ for bndi=1:size(bands,1)
     cfg.hilbert = 'abs';
   end
   dataBL = ft_preprocessing(cfg, data);
-
+  
+  if strfind(bandLabels{bndi},'Env')
+    cfg = [];
+    cfg.detrend    = 'yes';
+    cfg.demean     = 'yes';
+    cfg.feedback   = 'no';
+    cfg.trials     = 'all';
+    cfg.continuous = 'yes';
+    dataBL = ft_preprocessing(cfg, dataBL);
+  end
+  
   % compute microstate templates
   cfg = [];
   cfg.numtemplates = numMicrostates;
@@ -46,6 +57,7 @@ for bndi=1:size(bands,1)
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
   for plti=1:numMicrostates
+    figure(fh1);
     subplot(size(bands,1), numMicrostates, ((bndi-1)*numMicrostates)+plti);
     PlotMicrostateTemplate(microstateTemplates(plti,:), dataBL.label, lay);
     if plti==1
@@ -53,6 +65,19 @@ for bndi=1:size(bands,1)
     end
   end
   
+  % assign templates to time-series
+  cfg = [];
+  cfg.microstateTemplates = microstateTemplates;
+  dataBL = AssignMicrostateLabels(cfg, dataBL);
+
+  %% Plot microstate sequence
+  figure(fh2);
+  cfg = [];
+  cfg.trialindex = 1;
+  cfg.starttime = 0;
+  cfg.endtime = 5;
+  subplot(size(bands,1), 1, bndi);
+  PlotMicrostateSequence(dataBL, cfg);
   
   % find microstate sequence in electroneurophys data
   cfg = [];
