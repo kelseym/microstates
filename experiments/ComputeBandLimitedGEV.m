@@ -5,10 +5,10 @@ fileName = GetLocalDataFile();
 
 maxNumMicroStates = 10;
 maxFreq = 120;
-%bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
-%bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
-bands =       [1 120; 50 76; 50 76];
-bandLabels = {'FullBand','GammaMid','EnvGammaMid'};
+bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
+bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+% bands =       [1 120; 50 76; 50 76];
+% bandLabels = {'FullBand','GammaMid','EnvGammaMid'};
 colors = lines();
 
 load(fileName);
@@ -20,7 +20,7 @@ for bndi=1:size(bands,1)
   bandLabels{bndi}
 
   cfg = [];
-  cfg.resamplefs = maxFreq*2;
+  %cfg.resamplefs = maxFreq*2;
   cfg.detrend    = 'yes';
   cfg.demean     = 'yes';
   cfg.feedback   = 'no';
