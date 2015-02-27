@@ -3,7 +3,7 @@ clear;
 % load data
 fileName = GetLocalDataFile();
 
-numMicrostates = 4;
+numMicrostates = 3;
 maxFreq = 120;
 % frequencyBands = GetFrequencyBands();
 % bands =       frequencyBands.bands;
@@ -19,14 +19,13 @@ cfg.detrend    = 'yes';
 cfg.demean     = 'yes';
 cfg.feedback   = 'no';
 cfg.trials     = 'all';
+cfg.continuous = 'yes';
 
 
 fh1 = figure;
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
 
-  cfg = [];
-  cfg.continuous = 'yes';
   cfg.bpfilter = 'yes';
   cfg.bpfreq = band;
   if strfind(bandLabels{bndi},'Env')
