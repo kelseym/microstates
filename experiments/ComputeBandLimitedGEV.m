@@ -4,17 +4,17 @@ clear;
 fileName = GetLocalDataFile();
 
 maxNumMicroStates = 10;
-maxFreq = 100;
-bands =       [1,50;  1,100;  1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
-bandLabels = {'1-50','1-100','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
-%bands =       [1 100; 50 100];
-%bandLabels = {'1-100', '50-100'};
+maxFreq = 120;
+%bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
+%bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+bands =       [1 120; 50 76; 50 76];
+bandLabels = {'FullBand','GammaMid','EnvGammaMid'};
 colors = lines();
 
 load(fileName);
 data = ConcatenateTrials(data);
 cfg = [];
-cfg.resamplefs = maxFreq;
+cfg.resamplefs = maxFreq*2;
 cfg.detrend    = 'yes';
 cfg.demean     = 'yes';
 cfg.feedback   = 'no';
@@ -23,11 +23,15 @@ cfg.trials     = 'all';
 gev = zeros(size(bands,1),maxNumMicroStates);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
+  bandLabels{bndi}
 
   cfg = [];
   cfg.continuous = 'yes';
   cfg.bpfilter = 'yes';
   cfg.bpfreq = band;
+  if strfind(bandLabels{bndi},'Env')
+    cfg.hilbert = 'abs';
+  end
   dataBL = ft_preprocessing(cfg, data);
 
   %% compute microstate templates

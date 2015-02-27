@@ -3,13 +3,13 @@ clear;
 % load data
 fileName = GetLocalDataFile();
 
-numMicrostates = 3;
+numMicrostates = 4;
 maxFreq = 120;
 % frequencyBands = GetFrequencyBands();
 % bands =       frequencyBands.bands;
 % bandLabels =  frequencyBands.bandLabels;
-bands =       [1,50;       1,120;     35,50;     50,76;      76,120];
-bandLabels = {'Broadband','Fullband','GammaLow','GammaMid', 'GammaHigh'};
+bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
+bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 
 load(fileName);
 data = ConcatenateTrials(data);
@@ -29,6 +29,9 @@ for bndi=1:size(bands,1)
   cfg.continuous = 'yes';
   cfg.bpfilter = 'yes';
   cfg.bpfreq = band;
+  if strfind(bandLabels{bndi},'Env')
+    cfg.hilbert = 'abs';
+  end
   dataBL = ft_preprocessing(cfg, data);
 
   % compute microstate templates
@@ -38,6 +41,7 @@ for bndi=1:size(bands,1)
   cfg.clustertrainingstyle = 'global';
   globalMicrostateTemplates = ExtractMicrostateTemplates(cfg);
   microstateTemplates = globalMicrostateTemplates{1}{1};
+  dataBL.microstateTemplates = globalMicrostateTemplates{1};
   
   % Plot templates
   cfg = [];
@@ -59,13 +63,16 @@ for bndi=1:size(bands,1)
 
   % extract features from microstate sequence
   cfg = [];
-  cfg.features = {'meanduration','stdduration','gfppeakrate','stdgfppeaks'};
+  cfg.features = {'meanduration','stdduration','gfppeakrate','stdgfppeaks','templatedominance'};
   dataBL = MeasureFeatures(cfg, dataBL);
 
   % collect feature values
   
   meanDuration(bndi) = mean(GetFeatureValue(dataBL, 'meanduration'));
+  stdDuration(bndi) = mean(GetFeatureValue(dataBL, 'stdduration'));
   gfpPeakRate(bndi) = mean(GetFeatureValue(dataBL, 'gfppeakrate'));
+  stdGfpPeaks(bndi) = mean(GetFeatureValue(dataBL, 'stdgfppeaks'));
+  templateDominance(bndi) = mean(GetFeatureValue(dataBL, 'templatedominance'));
   
 end
 
@@ -76,7 +83,21 @@ set(gca, 'XTickLabel', bandLabels);
 title('Mean Duration');
 
 figure;
+bar(stdDuration);
+set(gca, 'XTickLabel', bandLabels);
+title('STD Duration');
+
+figure;
 bar(gfpPeakRate);
 set(gca, 'XTickLabel', bandLabels);
 title('GFP Peak Rate');
 
+figure;
+bar(stdGfpPeaks);
+set(gca, 'XTickLabel', bandLabels);
+title('STD GFP Peak Rate');
+
+figure;
+bar(templateDominance);
+set(gca, 'XTickLabel', bandLabels);
+title('Dominance');
