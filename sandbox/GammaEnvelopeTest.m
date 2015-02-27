@@ -19,7 +19,7 @@ for bndi=1:size(bands,1)
   band = bands(bndi,:);
 
   cfg = [];
-  cfg.resamplefs = maxFreq*2;
+  %cfg.resamplefs = maxFreq*2;
   cfg.detrend    = 'yes';
   cfg.demean     = 'yes';
   cfg.feedback   = 'no';
