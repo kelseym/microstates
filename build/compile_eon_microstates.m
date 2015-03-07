@@ -1,4 +1,4 @@
-function compile_eon_microstates(fieldtriproot, eon_microstates_root)
+function compile_eon_microstates(full_fieldtriproot, full_eon_microstates_root)
 
 % COMPILE_MEGCONNECTOME compiles eon_microstates fieldtrip functions along with
 % the "eon_microstates" entry function into a stand-alone compiled executable.
@@ -24,19 +24,19 @@ if ~strcmp(v.Version, '8.0')
     error('the eon_microstates application should be compiled with MATLAB 2012b (8.0)');
 end
 
-if nargin<1 || isempty(fieldtriproot)
-    fieldtriproot = fileparts(which('ft_defaults'));
+if nargin<1 || isempty(full_fieldtriproot)
+    full_fieldtriproot = fileparts(which('ft_defaults'));
 end
 
-if nargin<2 || isempty(eon_microstates_root)
+if nargin<2 || isempty(full_eon_microstates_root)
     % this script is in eon_microstates_root/build
-    eon_microstates_root = fileparts(which(mfilename));
-    eon_microstates_root = fileparts(eon_microstates_root);
+    full_eon_microstates_root = fileparts(which(mfilename));
+    full_eon_microstates_root = fileparts(full_eon_microstates_root);
 end
 
 origdir  = pwd;
-builddir = fullfile(eon_microstates_root, 'build');
-bindir   = fullfile(eon_microstates_root, 'bin');
+builddir = fullfile(full_eon_microstates_root, 'build');
+bindir   = fullfile(full_eon_microstates_root, 'bin');
 
 cd(builddir);
 
@@ -48,8 +48,8 @@ fclose(fid);
 
 cd(bindir);
 
-fprintf('Using fieldtrip     from "%s"\n', fieldtriproot);
-fprintf('Using eon_microstates from "%s"\n', eon_microstates_root);
+fprintf('Using fieldtrip     from "%s"\n', full_fieldtriproot);
+fprintf('Using eon_microstates from "%s"\n', full_eon_microstates_root);
 
 % clean the path
 restoredefaultpath;
@@ -58,7 +58,7 @@ restoredefaultpath;
 % FIELDTRIP RELATED PATH SETTINGS
 
 % add the path to fieldtrip
-addpath(fieldtriproot);
+addpath(full_fieldtriproot);
 
 % ensure that the path to the default modules is specified
 clear ft_defaults;
@@ -68,9 +68,9 @@ ft_defaults;
 global ft_default
 ft_default = [];
 
-% do not use my personal defaults, but rather HCP standard defaults
-global hcp_default
-hcp_default = [];
+% do not use my personal defaults, but rather EON standard defaults
+global eon_default
+eon_default = [];
 
 % ensure that these special modules are also added
 ft_hastoolbox('qsub', 1);
@@ -90,46 +90,43 @@ exclude = {
     'spm2'
     'sqdproject'
     'yokogawa'
+    'eeprobe'
     };
-extd = dir([fieldtriproot,'/external']);
+extd = dir([full_fieldtriproot,'/external']);
 extd = setdiff({extd([extd.isdir]).name}, exclude);
 for k = 1:numel(extd)
-    addpath(fullfile(fieldtriproot,'external',extd{k}));
+    addpath(fullfile(full_fieldtriproot,'external',extd{k}));
 end
 
 %--------------------------
 % RELATED PATH SETTINGS
 
-addpath(eon_microstates_root);
-%addpath(fullfile(eon_microstates_root, 'external'));
-addpath(fullfile(eon_microstates_root, 'analysis_functions'));
-addpath(fullfile(eon_microstates_root, 'experiments'));
-addpath(fullfile(eon_microstates_root, 'pipeline_scripts'));
+addpath(full_eon_microstates_root);
+addpath(fullfile(full_eon_microstates_root, 'analysis_functions'));
+addpath(fullfile(full_eon_microstates_root, 'experiments'));
+addpath(fullfile(full_eon_microstates_root, 'pipeline_scripts'));
 
 %-------------------
 % DO THE COMPILATION
 
 cmd = ['mcc -R -singleCompThread -N -o ' fname ' -m ' fname ...
-    ' -a ' fieldtriproot '/*.m' ...
-    ' -a ' fieldtriproot '/utilities/*.m' ...
-    ' -a ' fieldtriproot '/fileio/*.m' ...
-    ' -a ' fieldtriproot '/forward/*.m' ...
-    ' -a ' fieldtriproot '/inverse/*.m' ...
-    ' -a ' fieldtriproot '/plotting/*.m' ...
-    ' -a ' fieldtriproot '/statfun/*.m' ...
-    ' -a ' fieldtriproot '/trialfun/*.m' ...
-    ' -a ' fieldtriproot '/preproc/*.m' ...
-    ' -a ' fieldtriproot '/qsub/*.m' ...
-    ' -a ' fieldtriproot '/engine/*.m' ...
-    ' -a ' fieldtriproot '/external/plot2svg/*.m' ...
-    ' -a ' eon_microstates_root       '/libs/*.m' ...
-    ' -a ' eon_microstates_root       '/build/buildtimestamp.m' ...
-    ' -a ' eon_microstates_root       '/build/eon_microstates.m' ...
-%     ' -a ' eon_microstates_root       '/external/*.m' ...
-%     ' -a ' eon_microstates_root       '/external/*.mex*' ...
-    ' -a ' eon_microstates_root       '/analysis_functions/*.m' ...
-    ' -a ' eon_microstates_root       'experiments/*.m' ...
-    ' -a ' eon_microstates_root       '/plotting/*.m' ...
+    ' -a ' full_fieldtriproot '/*.m' ...
+    ' -a ' full_fieldtriproot '/utilities/*.m' ...
+    ' -a ' full_fieldtriproot '/fileio/*.m' ...
+    ' -a ' full_fieldtriproot '/forward/*.m' ...
+    ' -a ' full_fieldtriproot '/inverse/*.m' ...
+    ' -a ' full_fieldtriproot '/plotting/*.m' ...
+    ' -a ' full_fieldtriproot '/statfun/*.m' ...
+    ' -a ' full_fieldtriproot '/trialfun/*.m' ...
+    ' -a ' full_fieldtriproot '/preproc/*.m' ...
+    ' -a ' full_fieldtriproot '/qsub/*.m' ...
+    ' -a ' full_fieldtriproot '/engine/*.m' ...
+    ' -a ' full_eon_microstates_root       '/libs/*.m' ...
+    ' -a ' full_eon_microstates_root       '/build/buildtimestamp.m' ...
+    ' -a ' full_eon_microstates_root       '/build/eon_microstates.m' ...
+    ' -a ' full_eon_microstates_root       '/analysis_functions/*.m' ...
+    ' -a ' full_eon_microstates_root       '/experiments/*.m' ...
+    ' -a ' full_eon_microstates_root       '/plotting/*.m' ...
     ' -p ' matlabroot    '/toolbox/signal' ...
     ' -p ' matlabroot    '/toolbox/images' ...
     ' -p ' matlabroot    '/toolbox/stats' ...
