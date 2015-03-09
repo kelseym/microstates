@@ -18,7 +18,7 @@ function [gevArea, maxExVar, gev] = ComputeGEVMetrics(cfg, data)
   % get the options
   maxNumMicrostates = ft_getopt(cfg, 'maxnummicrostates');
 
-  gev = zeros(maxNumMicrostates);
+  gev = zeros(maxNumMicrostates,length(data.trial));
 
   % compute microstate templates
   for numMicrostates=1:maxNumMicrostates

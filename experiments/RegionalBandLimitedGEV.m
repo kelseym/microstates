@@ -1,13 +1,24 @@
 %% compute global explained variance of a microstate template set
-clear;
+%clear;
+
 % load data
-fileName = GetLocalDataFile();
+if ~exist(filename,'var')
+  fileName = GetLocalDataFile();
+end
+if ~exist(trialLength,'var')
+  trialLength = 240;
+end
+if ~exist(bands,'var')
+  bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
+  bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+  % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
+  % bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+end
+if ~iscell(bandLabels)
+  bandLabels = {bandLabels};
+end
 
 maxNumMicroStates = 15;
-% bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
-% bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
-bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
-bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 colors = lines();
 
 % load 9 region map
@@ -16,10 +27,16 @@ load('4D248_labelROI.mat');
 load(fileName);
 
 data = ConcatenateTrials(data);
+cfg.length=trialLength;
+cfg.overlap=0.0;
+data = ft_redefinetrial(cfg, data);
+
 
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
-
+  
+  disp('Processing %s Band', bandLabels{bndi})
+  
   cfg = [];
   cfg.detrend    = 'yes';
   cfg.demean     = 'yes';
@@ -46,16 +63,27 @@ for bndi=1:size(bands,1)
   % All region indices
   roiIndices = unique(labelROI);
   for rgni=1:length(roiIndices)
+    if roiIndices(rgni) <1 
+      continue;
+    end
     roiChannels = labels(labelROI==roiIndices(rgni));
     cfg = [];
     cfg.channel = roiChannels;
     rgnDataBL = ft_selectdata(cfg, dataBL);
-    [gevArea(bndi,rgni), maxExVar(bndi,rgni), gev(bndi,rgni)] = ComputeGEVMetrics(cfg,rgnDataBL);
+    cfg = [];
+    cfg.maxnummicrostates = 15;
+    % GEV metrics for each band and region. gev is further partitioned by numMicrostates and trial. i.e. gev(bandIndex,regionIndex,numMicrostates,trialIndex)
+    [gevArea(bndi,rgni), maxExVar(bndi,rgni), gev(bndi,rgni,:,:)] = ComputeGEVMetrics(cfg,rgnDataBL);
     clear 'rgnDataBL';
   end
   
   clear 'dataBL';
 end
+
+[~,dataName,~] = fileparts(fileName);
+outputFileName = sprintf('%s)RegionalBandLimitedGEV_%iSecondTrial.mat',dataName,trialLength);
+save(outputFileName, 'gevArea', 'maxExVar', 'gev');
+
 % 
 % %% Plot GEV
 % for trli=1:length(data.trial)

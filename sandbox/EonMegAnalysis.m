@@ -9,6 +9,14 @@ fileName = GetLocalDataFile();
 load(fileName, 'data');
 [~, scanLabel, ~] = fileparts(fileName);
 
+% select channels from specified region
+roiIndex = 1;
+load('4D248_labelROI.mat');
+roiChannels = labels(labelROI==roiIndex);
+cfg = [];
+cfg.channel = roiChannels;
+data = ft_selectdata(cfg, data);
+
 % band filter preprocess
 cfg = [];
 cfg.continuous = 'yes';
