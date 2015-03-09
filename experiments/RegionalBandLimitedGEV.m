@@ -1,14 +1,19 @@
 %% compute global explained variance of a microstate template set
 %clear;
 
-% load data
-if ~exist(filename,'var')
+
+
+%% load data and variables using static values unless already defined (e.g. using cluster scripts)
+if ~exist('fileName','var')
   fileName = GetLocalDataFile();
 end
-if ~exist(trialLength,'var')
+if ~exist('outputDir','var')
+  outputDir = GetLocalOutputDirectory();
+end
+if ~exist('trialLength','var')
   trialLength = 240;
 end
-if ~exist(bands,'var')
+if ~exist('bands','var')
   bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
   bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
   % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
@@ -18,8 +23,9 @@ if ~iscell(bandLabels)
   bandLabels = {bandLabels};
 end
 
+
+
 maxNumMicroStates = 15;
-colors = lines();
 
 % load 9 region map
 load('4D248_labelROI.mat');
@@ -35,7 +41,7 @@ data = ft_redefinetrial(cfg, data);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
   
-  disp('Processing %s Band', bandLabels{bndi})
+  disp(sprintf('Processing %s Band', bandLabels{bndi}));
   
   cfg = [];
   cfg.detrend    = 'yes';
@@ -72,20 +78,23 @@ for bndi=1:size(bands,1)
     rgnDataBL = ft_selectdata(cfg, dataBL);
     cfg = [];
     cfg.maxnummicrostates = 15;
-    % GEV metrics for each band and region. gev is further partitioned by numMicrostates and trial. i.e. gev(bandIndex,regionIndex,numMicrostates,trialIndex)
-    [gevArea(bndi,rgni), maxExVar(bndi,rgni), gev(bndi,rgni,:,:)] = ComputeGEVMetrics(cfg,rgnDataBL);
+    % GEV metrics for each region. gev is further partitioned by numMicrostates and trial. i.e. gev(bandIndex,regionIndex,numMicrostates,trialIndex)
+    [gevArea(rgni,:), maxExVar(rgni,:), gev(rgni,:,:)] = ComputeGEVMetrics(cfg,rgnDataBL);
     clear 'rgnDataBL';
   end
   
-  clear 'dataBL';
+  % save band specific gev
+  [~,dataName,~] = fileparts(fileName);
+  outputFileName = [outputDir filesep sprintf('%s_RegionalBandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
+  save(outputFileName, 'gevArea', 'maxExVar', 'gev');
+  
+  clear 'dataBL' 'gevArea' 'maxExVar' 'gev';
 end
 
-[~,dataName,~] = fileparts(fileName);
-outputFileName = sprintf('%s)RegionalBandLimitedGEV_%iSecondTrial.mat',dataName,trialLength);
-save(outputFileName, 'gevArea', 'maxExVar', 'gev');
 
 % 
 % %% Plot GEV
+% colors = lines();
 % for trli=1:length(data.trial)
 %   figure, hold on;
 %   title('Template Quantity Selection');
