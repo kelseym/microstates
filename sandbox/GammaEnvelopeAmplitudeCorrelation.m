@@ -12,7 +12,7 @@ bandLabels = {'Delta','Theta','ThetaAlpha','Alpha','BetaLow', 'BetaHigh','GammaL
 
 
 load(fileName);
-%data = ConcatenateTrials(data);
+data = ConcatenateTrials(data);
 
 dataBL = cell(size(bands,1),1);
 for bndi=1:size(bands,1)
@@ -56,10 +56,10 @@ for bndi=1:size(bands,1)
       data1Label = bandLabels{bndi};
       dataMatrix2 = dataBL{bndj}.trial{trli};
       data2Label = bandLabels{bndj};
-      channelLevelCorr = diag(corr(zscore(dataMatrix1'), zscore(dataMatrix2')));
-      avgCorr(bndi,bndj,trli) = mean(abs(channelLevelCorr));
-      minCorr(bndi,bndj,trli) = min(channelLevelCorr);
-      maxCorr(bndi,bndj,trli) = max(channelLevelCorr);
+      channelLevelCorr(bndi,bndj,:) = diag(corr(zscore(dataMatrix1'), zscore(dataMatrix2')));
+      avgCorr(bndi,bndj,trli) = mean(abs(channelLevelCorr(bndi,bndj,:)));
+      minCorr(bndi,bndj,trli) = min(channelLevelCorr(bndi,bndj,:));
+      maxCorr(bndi,bndj,trli) = max(channelLevelCorr(bndi,bndj,:));
     end
    end
 end
