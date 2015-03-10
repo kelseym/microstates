@@ -56,10 +56,10 @@ for bndi=1:size(bands,1)
       data1Label = bandLabels{bndi};
       dataMatrix2 = dataBL{bndj}.trial{trli};
       data2Label = bandLabels{bndj};
-      channelLevelCorr(bndi,bndj,:) = diag(corr(zscore(dataMatrix1'), zscore(dataMatrix2')));
-      avgCorr(bndi,bndj,trli) = mean(abs(channelLevelCorr(bndi,bndj,:)));
-      minCorr(bndi,bndj,trli) = min(channelLevelCorr(bndi,bndj,:));
-      maxCorr(bndi,bndj,trli) = max(channelLevelCorr(bndi,bndj,:));
+      channelLevelCorr(bndi,bndj,trli,:) = diag(corr(zscore(dataMatrix1'), zscore(dataMatrix2')));
+      avgCorr(bndi,bndj,trli) = mean(abs(channelLevelCorr(bndi,bndj,trli,:)));
+      minCorr(bndi,bndj,trli) = min(channelLevelCorr(bndi,bndj,trli,:));
+      maxCorr(bndi,bndj,trli) = max(channelLevelCorr(bndi,bndj,trli,:));
     end
    end
 end
