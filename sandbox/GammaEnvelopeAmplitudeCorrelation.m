@@ -8,7 +8,7 @@ fileName = GetLocalDataFile();
 % bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 
 bands =       [1,4;    4,8;    4,10;        8,15;   15,26;     26,35;     35,50;     50,76;      76,120;     1,4;       4,8;       4,10;           8,15;      15,26;        26,35;        35,50;        50,76;         76,120];
-bandLabels = {'Delta','Theta','ThetaAlpha','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh','EnvDelta','EnvTheta','EnvThetaAlpha','EnvAlpha','EnvBetaLow', 'EnvBetaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh',};
+bandLabels = {'Delta','Theta','ThetaAlpha','Alpha','BetaL', 'BetaH','GammaL','GammaM', 'GammaH','EnvDelta','EnvTheta','EnvThetaAlpha','EnvAlpha','EnvBetaL', 'EnvBetaH','EnvGammaL','EnvGammaM', 'EnvGammaH',};
 
 
 load(fileName);
@@ -64,7 +64,7 @@ for bndi=1:size(bands,1)
    end
 end
 
-%%
+%% Plot overall band limited amplitude correlations
 for trli=1:numTrials
   figure;
   imagesc(avgCorr(:,:,trli));
@@ -75,6 +75,28 @@ for trli=1:numTrials
   colorbar;
   title(sprintf('Trial %i Average Correlation',trli));
 end
+
+
+%% Plot regional amplitude correlations
+load('4D248_labelROI.mat');
+for rgni=1:9
+  figure;
+  channelLabelMask = labels(labelROI==rgni);
+  [channelIndexMask, ~] = match_str(data.label, channelLabelMask);
+  for trli=1:numTrials
+    regionalChannelLevelCorr = squeeze(channelLevelCorr(:,:,trli,channelIndexMask));
+    avgCorr = mean(abs(regionalChannelLevelCorr),3);
+    imagesc(avgCorr(:,:));
+    set(gca,'XTick', 1:size(bands,1));
+    set(gca,'YTick', 1:size(bands,1));
+    set(gca,'XTickLabel', bandLabels);
+    set(gca,'YTickLabel', bandLabels);
+    colorbar;
+    title(sprintf('Region %i - Trial %i Average Correlation',rgni,trli));
+
+  end
+end
+
   
 % figure;
 % imagesc(minCorr);
