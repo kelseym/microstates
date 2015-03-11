@@ -26,6 +26,13 @@ if ~iscell(bandLabels)
   bandLabels = {bandLabels};
 end
 
+% print parameters to output
+fileName
+outputDir
+trialLength
+bands
+bandLabels
+path
 
 
 maxNumMicroStates = 15;
@@ -89,7 +96,7 @@ for bndi=1:size(bands,1)
   % save band specific gev
   [~,dataName,~] = fileparts(fileName);
   outputFileName = [outputDir filesep sprintf('%s_RegionalBandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
-  save(outputFileName, 'gevArea', 'maxExVar', 'gev');
+  save(outputFileName, 'gevArea', 'maxExVar', 'gev', 'data.label');
   
   clear 'dataBL' 'gevArea' 'maxExVar' 'gev';
 end

@@ -8,7 +8,7 @@ fileName = GetLocalDataFile();
 % bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 
 bands =       [1,4;    4,8;    4,10;        8,15;   15,26;     26,35;     35,50;     50,76;      76,120;     1,4;       4,8;       4,10;           8,15;      15,26;        26,35;        35,50;        50,76;         76,120];
-bandLabels = {'Delta','Theta','ThetaAlpha','Alpha','BetaL', 'BetaH','GammaL','GammaM', 'GammaH','EnvDelta','EnvTheta','EnvThetaAlpha','EnvAlpha','EnvBetaL', 'EnvBetaH','EnvGammaL','EnvGammaM', 'EnvGammaH',};
+bandLabels = {'Delta','Theta','ThetaAlpha','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh','EnvDelta','EnvTheta','EnvThetaAlpha','EnvAlpha','EnvBetaLow', 'EnvBetaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh',};
 
 
 load(fileName);
@@ -72,6 +72,7 @@ for trli=1:numTrials
   set(gca,'YTick', 1:size(bands,1));
   set(gca,'XTickLabel', bandLabels);
   set(gca,'YTickLabel', bandLabels);
+  xticklabel_rotate(1:length(bandLabels),45,bandLabels,'interpreter','none')
   colorbar;
   title(sprintf('Trial %i Average Correlation',trli));
 end
@@ -91,6 +92,7 @@ for rgni=1:9
     set(gca,'YTick', 1:size(bands,1));
     set(gca,'XTickLabel', bandLabels);
     set(gca,'YTickLabel', bandLabels);
+    xticklabel_rotate(1:length(bandLabels),45,bandLabels,'interpreter','none')
     colorbar;
     title(sprintf('Region %i - Trial %i Average Correlation',rgni,trli));
 
