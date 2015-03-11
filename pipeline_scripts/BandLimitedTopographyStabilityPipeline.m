@@ -15,6 +15,10 @@ elseif ~exist('numMicrostates', 'var')
 elseif ~exist('outputDir', 'var')
   error('Missing input parameter: outputDir')
 end
+if exist('path', 'var')
+    addpath(path)
+end
+
 
 % Print variables to output
 subjectid

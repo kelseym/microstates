@@ -25,6 +25,10 @@ end
 if ~iscell(bandLabels)
   bandLabels = {bandLabels};
 end
+if exist('path', 'var')
+    addpath(path)
+end
+
 
 % print parameters to output
 fileName
