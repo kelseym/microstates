@@ -29,6 +29,8 @@ if exist('path', 'var')
     addpath(path)
 end
 
+% print matlab version information
+ver
 
 % print parameters to output
 fileName
@@ -100,7 +102,8 @@ for bndi=1:size(bands,1)
   % save band specific gev
   [~,dataName,~] = fileparts(fileName);
   outputFileName = [outputDir filesep sprintf('%s_RegionalBandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
-  save(outputFileName, 'gevArea', 'maxExVar', 'gev', 'data.label');
+  dataLabel = data.label;
+  save(outputFileName, 'gevArea', 'maxExVar', 'gev', 'dataLabel');
   
   clear 'dataBL' 'gevArea' 'maxExVar' 'gev';
 end
