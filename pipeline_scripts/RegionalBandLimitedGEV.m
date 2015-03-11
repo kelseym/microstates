@@ -33,12 +33,12 @@ end
 ver
 
 % print parameters to output
-fileName
-outputDir
-trialLength
-bands
-bandLabels
-path
+disp(fileName);
+disp(outputDir);
+disp(trialLength);
+disp(bands);
+disp(bandLabels);
+disp(path);
 
 
 maxNumMicroStates = 15;
