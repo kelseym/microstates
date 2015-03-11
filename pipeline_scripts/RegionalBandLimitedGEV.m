@@ -82,12 +82,10 @@ for bndi=1:size(bands,1)
     dataBL = ft_preprocessing(cfg, dataBL);
   end
   
-  % All region indices
+  % All region indices, except < 1
   roiIndices = unique(labelROI);
+  roiIndices(roiIndices==0) = [];
   for rgni=1:length(roiIndices)
-    if roiIndices(rgni) <1 
-      continue;
-    end
     roiChannels = labels(labelROI==roiIndices(rgni));
     cfg = [];
     cfg.channel = roiChannels;
