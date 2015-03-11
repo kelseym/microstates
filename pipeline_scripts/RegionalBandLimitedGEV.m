@@ -5,12 +5,15 @@
 
 %% load data and variables using static values unless already defined (e.g. using cluster scripts)
 if ~exist('fileName','var')
+  disp('fileName not defined. Using local test file.');
   fileName = GetLocalDataFile();
 end
 if ~exist('outputDir','var')
+  disp('outputDir not defined. Using local test directory.');
   outputDir = GetLocalOutputDirectory();
 end
 if ~exist('trialLength','var')
+  disp('trialLength not defined. Using 240s default.');
   trialLength = 240;
 end
 if ~exist('bands','var')
