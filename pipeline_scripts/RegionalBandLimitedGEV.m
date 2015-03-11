@@ -14,8 +14,8 @@ if ~exist('trialLength','var')
   trialLength = 240;
 end
 if ~exist('bands','var')
-  bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
-  bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+  bands =       [1,35;       1,120;    4,10;        35,50;     50,76;      76,120];
+  bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh'};
   % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
   % bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 end
@@ -91,22 +91,3 @@ for bndi=1:size(bands,1)
   clear 'dataBL' 'gevArea' 'maxExVar' 'gev';
 end
 
-
-% 
-% %% Plot GEV
-% colors = lines();
-% for trli=1:length(data.trial)
-%   figure, hold on;
-%   title('Template Quantity Selection');
-%   ylabel('GEV');
-%   xlabel('Number of Microstate Templates');
-%   hold on;
-%   for bndi=1:size(gev,1)
-%     plot(gev(bndi,:,trli),'.-', 'LineWidth', 2, 'Color', colors(bndi,:));
-%   end
-%   grid off;
-%   set(gca, 'XGrid', 'on');
-%   xlim([1 maxNumMicroStates]);
-%   set(gca,'XTick',1:maxNumMicroStates);
-%   legend(bandLabels);
-% end
