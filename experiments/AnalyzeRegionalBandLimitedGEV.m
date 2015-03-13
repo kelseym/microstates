@@ -27,9 +27,9 @@ for bndi=1:length(bandLabels)
   else
     load([dataDir matDataFile.name])
     orderedBandLabels{end+1} = bandLabels{bndi};
-    orderedGev(end+1,:,:) = gev;
-    orderedGevArea(end+1,:) = gevArea;
-    orderedMaxExVar(end+1,:) = maxExVar;
+    orderedGev(end+1,:,:) = mean(gev,3);
+    orderedGevArea(end+1,:) = mean(gevArea,2);
+    orderedMaxExVar(end+1,:) = mean(maxExVar,2);
     clear 'gev' 'gevArea' 'maxExVar';
   end
 end
@@ -47,14 +47,14 @@ regionLabels = {'R1','R2','R3','R4','R5','R6','R7','R8','R9'};
 % plot gevArea dim:bndi_rgni (grouped by region)
 figure;
 bh = bar(orderedGevArea(:,:)');
-title('GEV AUC - Grouped by Region')
+title(sprintf('GEV AUC - Grouped by Region - %i sec trial',trialLength));
 set(gca,'XTickLabel',regionLabels);
 legend(bh,orderedBandLabels);
 
 % plot maxExVar dim:bndi_rgni (grouped by region)
 figure;
 bh = bar(orderedMaxExVar(:,:)');
-title('Maximum Explained Variance - Grouped by Region')
+title(sprintf('Maximum Explained Variance - Grouped by Region - %i sec trial',trialLength));
 set(gca,'XTickLabel',regionLabels);
 legend(bh,orderedBandLabels);
 
