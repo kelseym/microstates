@@ -9,13 +9,13 @@ fileName = GetLocalDataFile();
 load(fileName, 'data');
 [~, scanLabel, ~] = fileparts(fileName);
 
-% select channels from specified region
-roiIndex = 1;
-load('4D248_labelROI.mat');
-roiChannels = labels(labelROI==roiIndex);
-cfg = [];
-cfg.channel = roiChannels;
-data = ft_selectdata(cfg, data);
+% % select channels from specified region
+% roiIndex = 1;
+% load('4D248_labelROI.mat');
+% roiChannels = labels(labelROI==roiIndex);
+% cfg = [];
+% cfg.channel = roiChannels;
+% data = ft_selectdata(cfg, data);
 
 % band filter preprocess
 cfg = [];
@@ -25,7 +25,7 @@ cfg.bsfreq = [59 61; 119 121; 179 181];
 cfg.demean = 'yes';
 cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
-cfg.bpfreq = [1.0 40.0];
+cfg.bpfreq = [1.0 120.0];
 data = ft_preprocessing(cfg, data);
 
 data = ConcatenateTrials(data);
