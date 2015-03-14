@@ -24,6 +24,8 @@ if ~exist('bands','var')
 end
 % if not already defined auto generate bandLabels from bands variable
 if ~exist('bandLabels','var')
+  disp('Generating Labels for Bands ');
+  bands
   bandLabels = {};
   for bndi=1:size(bands,1)
     band = bands(bndi,:);
@@ -93,7 +95,7 @@ for bndi=1:size(bands,1)
   
   % save band specific gev
   [~,dataName,~] = fileparts(fileName);
-  outputFileName = [outputDir filesep sprintf('%s_RegionalBandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
+  outputFileName = [outputDir filesep sprintf('%s_BandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
   dataLabel = data.label;
   save(outputFileName, 'gevArea', 'maxExVar', 'gev', 'dataLabel');
   
