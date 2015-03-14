@@ -33,7 +33,7 @@ function data = PerChannelTemplateStatistic(cfg, data)
   if strcmp(channelStatistic, 'dispersion')
     for trli=1:length(data.trial)
       for msi=1:size(data.microstateTemplates{trli},1)
-        data.dispersion{trli}(msi,:) = mad(data.trial{trli}(:, data.microstateIndices{trli} == msi),0,2);
+        data.dispersion{trli}(msi,:) = zscore(mad(data.trial{trli}(:, data.microstateIndices{trli} == msi),0,2));
       end
     end
     

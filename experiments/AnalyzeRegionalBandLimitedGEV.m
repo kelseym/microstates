@@ -8,32 +8,28 @@ bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaH
 
 trialLength = 240;
 
-experimentid = '105923_MEG_3-Restin';
+
+experimentids = {'105923_MEG_3-Restin', ...
+'106521_MEG_3-Restin', ...
+'109123_MEG_3-Restin', ...
+'114823_MEG_3-Restin', ...
+'153732_MEG_3-Restin', ...
+'166438_MEG_3-Restin', ...
+'172029_MEG_3-Restin', ...
+'185442_MEG_3-Restin', ...
+'189349_MEG_3-Restin', ...
+'205119_MEG_3-Restin', ...
+'255639_MEG_3-Restin', ...
+'287248_MEG_3-Restin', ...
+'568963_MEG_3-Restin', ...
+'601127_MEG_3-Restin', ...
+'660951_MEG_3-Restin', ...
+'665254_MEG_3-Restin', ...
+'715950_MEG_3-Restin', ...
+'820745_MEG_3-Restin', ...
+'912447_MEG_3-Restin'};
 
 colors = lines(10);
-
-orderedBandLabels={};
-orderedGev = [];
-orderedGevArea = [];
-orderedMaxExVar = [];
-
-% load matching data files
-for bndi=1:length(bandLabels)  
-  matDataFile = dir([dataDir sprintf('*%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat',experimentid,bandLabels{bndi},trialLength)]);
-  if length(matDataFile) >1
-    error('Mutiple matches found for *%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat in %s\nExiting early.',experimentid,bandLabels{bndi},trialLength,dataDir);
-  elseif isempty(matDataFile)
-    fprintf('No file found matching *%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat in %s',experimentid,bandLabels{bndi},trialLength,dataDir);
-  else
-    load([dataDir matDataFile.name])
-    orderedBandLabels{end+1} = bandLabels{bndi};
-    orderedGev(end+1,:,:) = mean(gev,3);
-    orderedGevArea(end+1,:) = mean(gevArea,2);
-    orderedMaxExVar(end+1,:) = mean(maxExVar,2);
-    clear 'gev' 'gevArea' 'maxExVar';
-  end
-end
-
 
 % load 9 region sensor map
 cfg = [];
@@ -42,21 +38,90 @@ lay = ft_prepare_layout(cfg);
 load('4D248_labelROI.mat');
 regionLabels = {'R1','R2','R3','R4','R5','R6','R7','R8','R9'};
 
-% plot gev statistics 
+% average statistics across all subjects
+avgOrderedGev = [];
+avgOrderedGevArea = [];
+avgOrderedMaxExVar = [];
+
+
+for exprmntdi=1:length(experimentids)
+  experimentid = experimentids{exprmntdi};
+  
+  orderedBandLabels={};
+  orderedGev = [];
+  orderedGevArea = [];
+  orderedMaxExVar = [];
+
+  % load matching data files
+  for bndi=1:length(bandLabels)  
+    matDataFile = dir([dataDir sprintf('*%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat',experimentid,bandLabels{bndi},trialLength)]);
+    if length(matDataFile) >1
+      error('Mutiple matches found for *%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat in %s\nExiting early.',experimentid,bandLabels{bndi},trialLength,dataDir);
+    elseif isempty(matDataFile)
+      fprintf('No file found matching *%s*RegionalBandLimitedGEV*%s*%iSecTrial*.mat in %s',experimentid,bandLabels{bndi},trialLength,dataDir);
+      continue;
+    else
+      load([dataDir matDataFile.name])
+      orderedBandLabels{end+1} = bandLabels{bndi};
+      orderedGev(end+1,:,:) = mean(gev,3);
+      orderedGevArea(end+1,:) = mean(gevArea,2);
+      orderedMaxExVar(end+1,:) = mean(maxExVar,2);
+      clear 'gev' 'gevArea' 'maxExVar';
+    end
+  end
+  
+  if exprmntdi == 1
+    avgOrderedGev = orderedGev; 
+    avgOrderedGevArea = orderedGevArea;
+    avgOrderedMaxExVar = orderedMaxExVar;
+  else
+    avgOrderedGev = avgOrderedGev + orderedGev; 
+    avgOrderedGevArea = avgOrderedGevArea + orderedGevArea;
+    avgOrderedMaxExVar = avgOrderedMaxExVar + orderedMaxExVar;
+  end
+
+  
+  % plot gev statistics 
+
+  % plot gevArea dim:bndi_rgni (grouped by region)
+  figure;
+  bh = bar(orderedGevArea(:,:)');
+  title(sprintf('GEV AUC - Grouped by Region - %i sec trial',trialLength));
+  set(gca,'XTickLabel',regionLabels);
+  legend(bh,orderedBandLabels);
+
+  % plot maxExVar dim:bndi_rgni (grouped by region)
+  figure;
+  bh = bar(orderedMaxExVar(:,:)');
+  title(sprintf('Maximum Explained Variance - Grouped by Region - %i sec trial',trialLength));
+  set(gca,'XTickLabel',regionLabels);
+  legend(bh,orderedBandLabels);
+
+end
+
+avgOrderedGev = avgOrderedGev/length(bandLabels); 
+avgOrderedGevArea = avgOrderedGevArea/length(bandLabels);
+avgOrderedMaxExVar = avgOrderedMaxExVar/length(bandLabels);
+
 
 % plot gevArea dim:bndi_rgni (grouped by region)
 figure;
 bh = bar(orderedGevArea(:,:)');
-title(sprintf('GEV AUC - Grouped by Region - %i sec trial',trialLength));
+title(sprintf('Population GEV AUC - Grouped by Region - %i sec trial',trialLength));
 set(gca,'XTickLabel',regionLabels);
 legend(bh,orderedBandLabels);
 
 % plot maxExVar dim:bndi_rgni (grouped by region)
 figure;
 bh = bar(orderedMaxExVar(:,:)');
-title(sprintf('Maximum Explained Variance - Grouped by Region - %i sec trial',trialLength));
+title(sprintf('Population Maximum Explained Variance - Grouped by Region - %i sec trial',trialLength));
 set(gca,'XTickLabel',regionLabels);
 legend(bh,orderedBandLabels);
+
+
+
+
+
 
 
 

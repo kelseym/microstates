@@ -25,7 +25,7 @@ cfg.bsfreq = [59 61; 119 121; 179 181];
 cfg.demean = 'yes';
 cfg.detrend = 'yes';
 cfg.bpfilter = 'yes';
-cfg.bpfreq = [1.0 120.0];
+cfg.bpfreq = [1 40];
 data = ft_preprocessing(cfg, data);
 
 data = ConcatenateTrials(data);
@@ -33,20 +33,26 @@ data = ConcatenateTrials(data);
 %% Plot time series
 PlotTimeSeries(data, 0, 5, '');
 
-%% Plot GFP
-[gfp, gfpPkLocs] = LocateGfpPeaks(data.trial{1});
+%% Extract GFP Peaks
+for trli=1:length(data.trial)
+  [gfp{trli}, gfpPkLocs{trli}] = LocateGfpPeaks(data.trial{trli});
+end
+data.gfpPkLocs = gfpPkLocs;
+data.gfp = gfp;
+
+% Plot GFP
 startS = 0;
 endS = 5;
 pltSmpls = startS*data.fsample:endS*data.fsample;
 pltSmpls = floor(pltSmpls)+1;
 figure;
-plot(data.time{1}(pltSmpls), gfp(pltSmpls),'b');
+plot(data.time{1}(pltSmpls), gfp{1}(pltSmpls),'b');
 title(['Global Field Power']);
 xlabel('Time (s)');
 ylabel('GFP');
 hold on;
-pltPksIndx = gfpPkLocs(gfpPkLocs<(5*data.fsample));
-plot(data.time{1}(pltPksIndx), gfp(pltPksIndx),'r.');
+pltPksIndx = gfpPkLocs{1}(gfpPkLocs{1}<(5*data.fsample));
+plot(data.time{1}(pltPksIndx), gfp{1}(pltPksIndx),'r.');
 
 
 %% extract N microstate templates
@@ -100,6 +106,7 @@ cfg = [];
 cfg.trialindex = 1;
 cfg.starttime = 0;
 cfg.endtime = 5;
+figure;
 PlotMicrostateSequence(dataStructs{1}, cfg);
 
 %% Plot microstate features

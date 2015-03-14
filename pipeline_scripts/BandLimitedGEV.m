@@ -1,5 +1,7 @@
-%% BandLimitedChannelDispersion
-%   Measure and display microstate template dispersion by channel
+%% compute global explained variance of a microstate template set
+%clear;
+
+
 
 %% load data and variables using static values unless already defined (e.g. using cluster scripts)
 if ~exist('fileName','var')
@@ -14,15 +16,19 @@ if ~exist('trialLength','var')
   disp('trialLength not defined. Using 240s default.');
   trialLength = 240;
 end
-if ~exist('numMicrostates','var')
-  disp('trialLength not defined. Using 240s default.');
-  numMicrostates = 3;
-end
 if ~exist('bands','var')
   bands =       [1,35;       1,120;    4,10;        35,50;     50,76;      76,120];
   bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh'};
   % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
   % bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+end
+% if not already defined auto generate bandLabels from bands variable
+if ~exist('bandLabels','var')
+  bandLabels = {};
+  for bndi=1:size(bands,1)
+    band = bands(bndi,:);
+    bandLabels{end+1}=sprintf('%i-%iHz',band(1),band(2));
+  end
 end
 if ~iscell(bandLabels)
   bandLabels = {bandLabels};
@@ -35,40 +41,29 @@ end
 ver
 
 % print parameters to output
-fileName
-outputDir
-trialLength
-bands
-bandLabels
-path
+disp(fileName);
+disp(outputDir);
+disp(trialLength);
+disp(bands);
+disp(bandLabels);
+disp(path);
 
+
+maxNumMicroStates = 15;
 
 load(fileName);
 
-% parse trials
 data = ConcatenateTrials(data);
 cfg.length=trialLength;
 cfg.overlap=0.0;
 data = ft_redefinetrial(cfg, data);
 
-replaceWithNoise = 1;
-if replaceWithNoise 
-  for trli=1:length(data.trial)
-    overallRange = mean(range(data.trial{trli},2));
-    overallMin = mean(min(data.trial{trli},2));
-    randTrial = randn(size(data.trial{trli},1), size(data.trial{trli},2));
-    randTrial = randTrial.*overallRange;
-    randTrial = randTrial + overallRange;
-    data.trial{trli} = randTrial;
-  end
-end
 
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
   
   disp(sprintf('Processing %s Band', bandLabels{bndi}));
- 
-  % band pass filter the data
+  
   cfg = [];
   cfg.detrend    = 'yes';
   cfg.demean     = 'yes';
@@ -91,39 +86,17 @@ for bndi=1:size(bands,1)
     cfg.continuous = 'yes';
     dataBL = ft_preprocessing(cfg, dataBL);
   end
-
-  % extract microstates from bp data
+  
   cfg = [];
-  cfg.numtemplates = numMicrostates;
-  cfg.datastructs = dataBL;
-  cfg.clustertrainingstyle = 'trial';
-  templates = ExtractMicrostateTemplates(cfg);
-  dataBL.microstateTemplates = templates{1};
-
-  % Plot Template Maps
-  cfg = [];
-  cfg.layout = '4D248.mat';
-  lay = ft_prepare_layout(cfg);
-  fh1 = PlotMicrostateTemplateSet(dataBL.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+  cfg.maxnummicrostates = 15;
+  [gevArea, maxExVar, gev] = ComputeGEVMetrics(cfg,dataBL);
   
-  %% find microstate sequence in electroneurophys data
-  cfg = [];
-  cfg.microstateTemplates = dataBL.microstateTemplates{1};
-	dataBL = AssignMicrostateLabels(cfg, dataBL);
+  % save band specific gev
+  [~,dataName,~] = fileparts(fileName);
+  outputFileName = [outputDir filesep sprintf('%s_RegionalBandLimitedGEV_%sBand_%iSecTrial.mat',dataName,bandLabels{bndi},trialLength)];
+  dataLabel = data.label;
+  save(outputFileName, 'gevArea', 'maxExVar', 'gev', 'dataLabel');
   
-  % compute per channel dispersion of each template
-  cfg = [];
-  cfg.channelstatistic = 'dispersion';
-  dataBL = PerChannelTemplateStatistic(cfg, dataBL);
-  colormap(jet);
-  
-  % plot per channel dispersion
-  cfg = [];
-  cfg.layout = '4D248.mat';
-  lay = ft_prepare_layout(cfg);
-  fh2 = PlotMicrostateTemplateSet(dataBL.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
-  colormap(cool);
-  
-  
-  
+  clear 'dataBL' 'gevArea' 'maxExVar' 'gev';
 end
+
