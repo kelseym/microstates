@@ -15,8 +15,8 @@ do
   echo $EXPERIMENTID
   while read BAND; do
     export BANDS=$BAND
-    qsub -V -q dque -l walltime=0:59:59,mem=8gb,vmem=8gb  -o $LOGDIR/OUTLOG_$PIPELINE_$EXPERIMENTID.log -e $LOGDIR/ERRORLOG_$PIPELINE_$EXPERIMENTID.log $QSUBDIR/$PIPELINE.pbs > $LOGDIR/jobids-$PIPELINE_$EXPERIMENTID.txt
-  done < bandList.txt
+    qsub -V -q dque -l walltime=3:59:59,mem=8gb,vmem=8gb  -o $LOGDIR/OUTLOG_$PIPELINE_$EXPERIMENTID.log -e $LOGDIR/ERRORLOG_$PIPELINE_$EXPERIMENTID.log $QSUBDIR/$PIPELINE.pbs > $LOGDIR/jobids-$PIPELINE_$EXPERIMENTID.txt
+  done < bandList2-2.txt
 done
 
 #-------------------------------------------------------------- 
