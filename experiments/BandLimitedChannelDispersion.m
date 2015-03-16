@@ -38,11 +38,12 @@ ver
 fileName
 outputDir
 trialLength
+numMicrostates
 bands
 bandLabels
 path
 
-
+tic;
 load(fileName);
 
 % parse trials
@@ -69,7 +70,7 @@ dataBL = cell(size(bands,1),1);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
   
-  fprintf('Processing %s Band', bandLabels{bndi});
+  fprintf('Processing %s ', bandLabels{bndi});
  
   % band pass filter the data
   cfg = [];
@@ -112,7 +113,7 @@ for bndi=1:size(bands,1)
   colormap(jet);
   % save template topo plot
   [~,dataName,~] = fileparts(fileName);
-  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s.mat',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
   saveas(fh1,outputFileName,'fig')
   saveas(fh1,outputFileName,'png')
   
@@ -134,7 +135,7 @@ for bndi=1:size(bands,1)
   colormap(cool);
   % save template topo plot
   [~,dataName,~] = fileparts(fileName);
-  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s.mat',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
   saveas(fh2,outputFileName,'fig')
   saveas(fh2,outputFileName,'png')
   
@@ -147,5 +148,5 @@ end
 [~,dataName,~] = fileparts(fileName);
 outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_NumMicrostates-%i_TrialLength-%i.mat',dataName,numMicrostates,trialLength)];
 save(outputFileName, 'dataBL', 'bands', 'bandLabels', 'dataName');
- 
+toc;
   
