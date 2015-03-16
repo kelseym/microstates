@@ -15,7 +15,7 @@ if ~exist('trialLength','var')
   trialLength = 240;
 end
 if ~exist('numMicrostates','var')
-  disp('trialLength not defined. Using 240s default.');
+  disp('numMicrostates not defined. Using 3 as default.');
   numMicrostates = 3;
 end
 if ~exist('bands','var')

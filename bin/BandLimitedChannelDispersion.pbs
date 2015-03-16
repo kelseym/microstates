@@ -22,8 +22,6 @@ SUBJECTID=`echo $EXPERIMENTID | cut -d '_' -f 1`
 
 echo
 echo "SUBJECTID      =" $SUBJECTID
-echo "NUMMICROSTATES =" $NUMMICROSTATES
-echo "BANDS          =" $BANDS
 echo "OUTPUTDIR      =" $OUTPUTDIR 
 echo "MATLABFILENAME =" $MATLABFILENAME
 
@@ -62,23 +60,23 @@ export DISPLAY=:$xPort
  echo " ======================================================= " 
 NUMMICROSTATES=2;
 echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
 
 NUMMICROSTATES=3;
 echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
 
 NUMMICROSTATES=4;
 echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
 
 NUMMICROSTATES=5;
 echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
 
 NUMMICROSTATES=6;
 echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
 
 #------------------------------
 #CLOSE VIRTUAL BUFFER 
