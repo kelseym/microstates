@@ -19,8 +19,8 @@ if ~exist('numMicrostates','var')
   numMicrostates = 3;
 end
 if ~exist('bands','var')
-  bands =       [1,35;       1,120;    4,10;        35,50;     50,76;      76,120];
-  bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh'};
+  bands =       [1,35;  1,120;          1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120;     35,50;        50,76;         76,120];
+  bandLabels = {'Broadband','Fullband','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
   % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
   % bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 end
@@ -51,7 +51,8 @@ cfg.length=trialLength;
 cfg.overlap=0.0;
 data = ft_redefinetrial(cfg, data);
 
-replaceWithNoise = 1;
+% optionally replace signal with noise
+replaceWithNoise = 0;
 if replaceWithNoise 
   for trli=1:length(data.trial)
     overallRange = mean(range(data.trial{trli},2));
@@ -63,10 +64,12 @@ if replaceWithNoise
   end
 end
 
+
+dataBL = cell(size(bands,1),1);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
   
-  disp(sprintf('Processing %s Band', bandLabels{bndi}));
+  fprintf('Processing %s Band', bandLabels{bndi});
  
   % band pass filter the data
   cfg = [];
@@ -80,8 +83,9 @@ for bndi=1:size(bands,1)
   if strfind(bandLabels{bndi},'Env')
     cfg.hilbert = 'abs';
   end
-  dataBL = ft_preprocessing(cfg, data);
+  dataBL{bndi} = ft_preprocessing(cfg, data);
 
+  % de-mean enveloped signal to form dipole like activity
   if strfind(bandLabels{bndi},'Env')
     cfg = [];
     cfg.detrend    = 'yes';
@@ -89,41 +93,59 @@ for bndi=1:size(bands,1)
     cfg.feedback   = 'no';
     cfg.trials     = 'all';
     cfg.continuous = 'yes';
-    dataBL = ft_preprocessing(cfg, dataBL);
+    dataBL{bndi} = ft_preprocessing(cfg, dataBL{bndi});
   end
 
   % extract microstates from bp data
   cfg = [];
   cfg.numtemplates = numMicrostates;
-  cfg.datastructs = dataBL;
+  cfg.datastructs = dataBL{bndi};
   cfg.clustertrainingstyle = 'trial';
   templates = ExtractMicrostateTemplates(cfg);
-  dataBL.microstateTemplates = templates{1};
+  dataBL{bndi}.microstateTemplates = templates{1};
 
   % Plot Template Maps
   cfg = [];
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
-  fh1 = PlotMicrostateTemplateSet(dataBL.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+  fh1 = PlotMicrostateTemplateSet(dataBL{bndi}.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+  colormap(jet);
+  % save template topo plot
+  [~,dataName,~] = fileparts(fileName);
+  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s.mat',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+  saveas(fh1,outputFileName,'fig')
+  saveas(fh1,outputFileName,'png')
   
   %% find microstate sequence in electroneurophys data
   cfg = [];
-  cfg.microstateTemplates = dataBL.microstateTemplates{1};
-	dataBL = AssignMicrostateLabels(cfg, dataBL);
+  cfg.microstateTemplates = dataBL{bndi}.microstateTemplates{1};
+	dataBL{bndi} = AssignMicrostateLabels(cfg, dataBL{bndi});
   
   % compute per channel dispersion of each template
   cfg = [];
   cfg.channelstatistic = 'dispersion';
-  dataBL = PerChannelTemplateStatistic(cfg, dataBL);
-  colormap(jet);
+  dataBL{bndi} = PerChannelTemplateStatistic(cfg, dataBL{bndi});
   
   % plot per channel dispersion
   cfg = [];
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
-  fh2 = PlotMicrostateTemplateSet(dataBL.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
+  fh2 = PlotMicrostateTemplateSet(dataBL{bndi}.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
   colormap(cool);
+  % save template topo plot
+  [~,dataName,~] = fileparts(fileName);
+  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s.mat',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+  saveas(fh2,outputFileName,'fig')
+  saveas(fh2,outputFileName,'png')
   
-  
-  
+
+  close all
+  % clear trial data from dataBL to save space
+  dataBL{bndi}.trial = {};
 end
+
+[~,dataName,~] = fileparts(fileName);
+outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_NumMicrostates-%i_TrialLength-%i.mat',dataName,numMicrostates,trialLength)];
+save(outputFileName, 'dataBL', 'bands', 'bandLabels', 'dataName');
+ 
+  
