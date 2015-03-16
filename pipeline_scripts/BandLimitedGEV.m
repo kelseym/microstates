@@ -17,8 +17,9 @@ if ~exist('trialLength','var')
   trialLength = 240;
 end
 if ~exist('bands','var')
-  bands =       [1,35;       1,120;    4,10;        35,50;     50,76;      76,120];
-  bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh'};
+  bands = [1:10:111;10:10:121]';
+%   bands =       [1,35;       1,120;    4,10;        35,50;     50,76;      76,120];
+%   bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh'};
   % bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
   % bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
 end
