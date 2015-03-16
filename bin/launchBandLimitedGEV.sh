@@ -13,7 +13,7 @@ for ff in $DATAFILES
 do
   export EXPERIMENTID=${ff:0:19}
   echo $EXPERIMENTID
-  qsub -V -q dque -l walltime=23:59:59,mem12gb,vmem=12gb  -o $LOGDIR/OUTLOG_$PIPELINE_$EXPERIMENTID.log -e $LOGDIR/ERRORLOG_$PIPELINE_$EXPERIMENTID.log $QSUBDIR/$PIPELINE.pbs > $LOGDIR/jobids-$PIPELINE_$EXPERIMENTID.txt
+  qsub -V -q dque -l walltime=23:59:59,mem=12gb,vmem=12gb  -o $LOGDIR/OUTLOG_$PIPELINE_$EXPERIMENTID.log -e $LOGDIR/ERRORLOG_$PIPELINE_$EXPERIMENTID.log $QSUBDIR/$PIPELINE.pbs > $LOGDIR/jobids-$PIPELINE_$EXPERIMENTID.txt
 done
 
 #-------------------------------------------------------------- 
