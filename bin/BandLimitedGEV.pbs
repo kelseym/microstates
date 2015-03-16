@@ -60,7 +60,7 @@ export DISPLAY=:$xPort
 #RUN PIPELINE SCRIPT 
  echo " Starting pipeline " 
  echo " ======================================================= " 
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --bands $BANDS --path $ADDPATH
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedGEV.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH
 #------------------------------
 #CLOSE VIRTUAL BUFFER 
 kill $curPID
