@@ -1,6 +1,15 @@
 %% BandLimitedChannelDispersion
 %   Measure and display microstate template dispersion by channel
 
+% print the value of all local variables to screen for provenance
+w = whos;
+w = {w.name};
+w = setdiff(w, {'w', 'ans'});
+for i=1:length(w)
+    eval(w{i})
+end
+
+
 %% load data and variables using static values unless already defined (e.g. using cluster scripts)
 if ~exist('fileName','var')
   disp('fileName not defined. Using local test file.');

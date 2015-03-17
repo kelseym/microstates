@@ -33,6 +33,7 @@ else
       args="${args} ${token}" 
       shift
   done
+  echo  "${exe_dir}"/eon_microstates $args
   "${exe_dir}"/eon_microstates $args
 fi
 exit
