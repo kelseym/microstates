@@ -59,25 +59,43 @@ export DISPLAY=:$xPort
  echo " Starting pipeline " 
  echo " ======================================================= " 
 NUMMICROSTATES=2;
-echo "NUMMICROSTATES " $NUMMICROSTATES
-sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
 
-#NUMMICROSTATES=3;
-#echo "NUMMICROSTATES " $NUMMICROSTATES
-#sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
-#
-#NUMMICROSTATES=4;
-#echo "NUMMICROSTATES " $NUMMICROSTATES
-#sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
-#
-#NUMMICROSTATES=5;
-#echo "NUMMICROSTATES " $NUMMICROSTATES
-#sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
-#
-#NUMMICROSTATES=6;
-#echo "NUMMICROSTATES " $NUMMICROSTATES
-#sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates=$NUMMICROSTATES
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
 
-#------------------------------
-#CLOSE VIRTUAL BUFFER 
+NUMMICROSTATES=3;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=4;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=5;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=6;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=7;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=8;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=9;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+NUMMICROSTATES=10;
+echo "PBS COMMAND>>>  " "$BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES"
+sh $BINEXECDIR/eon_microstates.sh $MCRDIR  $PROJECTHOME/pipeline_scripts/BandLimitedChannelDispersion.m --subjectid $SUBJECTID --fileName $MATLABFILENAME --outputDir $OUTPUTDIR --path $ADDPATH --numMicrostates $NUMMICROSTATES
+
+
+------------------------------
+CLOSE VIRTUAL BUFFER 
 kill $curPID

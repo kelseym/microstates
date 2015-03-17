@@ -52,7 +52,6 @@ bands
 bandLabels
 path
 
-tic;
 load(fileName);
 
 % parse trials
@@ -118,13 +117,13 @@ for bndi=1:size(bands,1)
   cfg = [];
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
-  fh1 = PlotMicrostateTemplateSet(dataBL{bndi}.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
-  colormap(jet);
-  % save template topo plot
-  [~,dataName,~] = fileparts(fileName);
-  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
-  saveas(fh1,outputFileName,'fig')
-  saveas(fh1,outputFileName,'png')
+%  fh1 = PlotMicrostateTemplateSet(dataBL{bndi}.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+%  colormap(jet);
+%  % save template topo plot
+%  [~,dataName,~] = fileparts(fileName);
+%  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+%  saveas(fh1,outputFileName,'fig')
+%  saveas(fh1,outputFileName,'png')
   
   %% find microstate sequence in electroneurophys data
   cfg = [];
@@ -140,16 +139,16 @@ for bndi=1:size(bands,1)
   cfg = [];
   cfg.layout = '4D248.mat';
   lay = ft_prepare_layout(cfg);
-  fh2 = PlotMicrostateTemplateSet(dataBL{bndi}.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
-  colormap(cool);
-  % save template topo plot
-  [~,dataName,~] = fileparts(fileName);
-  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
-  saveas(fh2,outputFileName,'fig')
-  saveas(fh2,outputFileName,'png')
+%  fh2 = PlotMicrostateTemplateSet(dataBL{bndi}.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
+%  colormap(cool);
+%  % save template topo plot
+%  [~,dataName,~] = fileparts(fileName);
+%  outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s',dataName,numMicrostates,trialLength,bandLabels{bndi})];
+%  saveas(fh2,outputFileName,'fig')
+%  saveas(fh2,outputFileName,'png')
   
 
-  close all
+%  close all
   % clear trial data from dataBL to save space
   dataBL{bndi}.trial = {};
 end
@@ -157,5 +156,4 @@ end
 [~,dataName,~] = fileparts(fileName);
 outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_NumMicrostates-%i_TrialLength-%i.mat',dataName,numMicrostates,trialLength)];
 save(outputFileName, 'dataBL', 'bands', 'bandLabels', 'dataName');
-toc;
   
