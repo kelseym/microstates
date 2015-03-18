@@ -11,8 +11,8 @@ trialLength = 240;
 numMicrostates = 3;
 
 experimentids = {'105923_MEG_3-Restin', ...
-% '106521_MEG_3-Restin', ...
-% '109123_MEG_3-Restin', ...
+'106521_MEG_3-Restin', ...
+'109123_MEG_3-Restin', ...
 % '114823_MEG_3-Restin', ...
 % '153732_MEG_3-Restin', ...
 % '166438_MEG_3-Restin', ...
@@ -34,6 +34,7 @@ experimentids = {'105923_MEG_3-Restin', ...
 
 colors = lines(10);
 
+bandLimitedCorr = zeros(length(experimentids),length(bandLabels),numMicrostates);
 experimentData = cell(length(experimentids),1);
 for exprmntdi=1:length(experimentids)
   experimentid = experimentids{exprmntdi};
@@ -55,17 +56,66 @@ for exprmntdi=1:length(experimentids)
         error('Band Label: %s not found in %s',bandLabels{bndi},experimentData{exprmntdi}.dataName);
       end
       data = experimentData{exprmntdi}.dataBL{bndIdx};
-      avgCorr = zeros(length(data.microstateTemplates),1);
+      templat2DispersionCorr = zeros(length(data.microstateTemplates), length(data.microstateTemplates));
       for trli=1:length(data.microstateTemplates)
-        for 
+        for tmplti=1:size(data.microstateTemplates{trli},1)
+          template = data.microstateTemplates{trli}(tmplti,:);
+          dispersion = data.dispersion{trli}(tmplti,:);
+          templat2DispersionCorr(tmplti,trli) = corr2(abs(template)/norm(abs(template)),dispersion/norm(dispersion));
+        end
+      end
+      bandLimitedCorr(exprmntdi,bndi,:) = mean(templat2DispersionCorr,2);
       
+%       % Plot Template Maps
+%       cfg = [];
+%       cfg.layout = '4D248.mat';
+%       lay = ft_prepare_layout(cfg);
+%       fh1 = PlotMicrostateTemplateSet(data.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+%       colormap(jet);
+% 
+%       % plot per channel dispersion
+%       cfg = [];
+%       cfg.layout = '4D248.mat';
+%       lay = ft_prepare_layout(cfg);
+%       fh2 = PlotMicrostateTemplateSet(data.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
+%       colormap(cool);
+    
     end
     
+    figure;
+    bh1 = bar(squeeze(bandLimitedCorr(exprmntdi,:,:)));
+    title(sprintf('Mean Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
+    set(gca, 'XTick', 1:length(bandLabels));
+    set(gca, 'XTickLabel',bandLabels);
+    xticklabel_rotate;
+    
+    figure;
+    bh2 = bar(squeeze(mean(bandLimitedCorr(exprmntdi,:,:),3)));
+    title(sprintf('Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
+    set(gca, 'XTick', 1:length(bandLabels));
+    set(gca, 'XTickLabel',bandLabels);
+    xticklabel_rotate;
+    
+    
   end
-
   
   
 end
+
+  
+figure;
+bh1 = bar(squeeze(mean(bandLimitedCorr(:,:,:),1)));
+title(sprintf('Population Template to Dispersion Correlation'));
+set(gca, 'XTick', 1:length(bandLabels));
+set(gca, 'XTickLabel',bandLabels);
+xticklabel_rotate;
+
+figure;
+bh2 = bar(squeeze(mean(mean(bandLimitedCorr(:,:,:),1),3)));
+title(sprintf('Population Template to Dispersion Correlation'));
+set(gca, 'XTick', 1:length(bandLabels));
+set(gca, 'XTickLabel',bandLabels);
+xticklabel_rotate;
 
 
 
