@@ -3,25 +3,31 @@ clear;
 
 dataDir = GetLocalOutputDirectory();
 
-bands = [];
-% for bandEnd=5:5:120;
-%   bands(end+1,:) = [1, bandEnd];
+% bands = [];
+% % for bandEnd=5:5:120;
+% %   bands(end+1,:) = [1, bandEnd];
+% % end
+% bands = [1:10:111;10:10:121]';
+% bandLabels = {};
+% for bndi=1:size(bands,1)
+%   band = bands(bndi,:);
+%   bandLabels{end+1}=sprintf('%i-%iHz',band(1),band(2));
 % end
-bands = [1:10:111;10:10:121]';
-bandLabels = {};
-for bndi=1:size(bands,1)
-  band = bands(bndi,:);
-  bandLabels{end+1}=sprintf('%i-%iHz',band(1),band(2));
-end
+
+bands =       [1,35;  1,120;          1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
+bandLabels = {'Broadband','Fullband','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
+
 
 trialLength = 240;
 
+% '153732_MEG_3-Restin', ...
+% '665254_MEG_3-Restin', ...
+% '715950_MEG_3-Restin', ...
 
 experimentids = {'105923_MEG_3-Restin', ...
 '106521_MEG_3-Restin', ...
 '109123_MEG_3-Restin', ...
 '114823_MEG_3-Restin', ...
-'153732_MEG_3-Restin', ...
 '166438_MEG_3-Restin', ...
 '172029_MEG_3-Restin', ...
 '185442_MEG_3-Restin', ...
@@ -33,8 +39,6 @@ experimentids = {'105923_MEG_3-Restin', ...
 '568963_MEG_3-Restin', ...
 '601127_MEG_3-Restin', ...
 '660951_MEG_3-Restin', ...
-'665254_MEG_3-Restin', ...
-'715950_MEG_3-Restin', ...
 '820745_MEG_3-Restin', ...
 '912447_MEG_3-Restin'};
 
@@ -92,7 +96,6 @@ for exprmntdi=1:length(experimentids)
 %   title(sprintf('GEV AUC - %i sec trial',trialLength));
 %   set(gca,'XTick',1:length(bandLabels));
 %   set(gca,'XTickLabel',bandLabels);
-%   legend(bh,orderedBandLabels);
 % 
 %   % plot maxExVar dim:bndi_rgni (grouped by region)
 %   figure;
@@ -100,7 +103,6 @@ for exprmntdi=1:length(experimentids)
 %   title(sprintf('Maximum Explained Variance - %i sec trial',trialLength));
 %   set(gca,'XTickLabel',bandLabels);
 %   set(gca,'XTickLabel',bandLabels);
-%   legend(bh,orderedBandLabels);
 
 end
 
@@ -111,19 +113,21 @@ avgOrderedMaxExVar = avgOrderedMaxExVar/length(bandLabels);
 
 % plot gevArea dim:bndi_rgni (grouped by region)
 figure;
-bh = bar(orderedGevArea(:,:)');
-title(sprintf('Population GEV AUC - Grouped by Region - %i sec trial',trialLength));
+bh = bar(avgOrderedGevArea(:,:)');
+title(sprintf('Population GEV AUC'), 'FontSize',20);
+ylabel('GEV AUC', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
-xticklabel_rotate;
+xticklabel_rotate([],45,[],'Fontsize',14);
 
 % plot maxExVar dim:bndi_rgni (grouped by region)
 figure;
-bh = bar(orderedMaxExVar(:,:)');
-title(sprintf('Population Maximum Explained Variance - Grouped by Region - %i sec trial',trialLength));
+bh = bar(avgOrderedMaxExVar(:,:)');
+title(sprintf('Population Maximum Explained Variance'), 'FontSize',20);
+ylabel('Maximum GEV', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
-xticklabel_rotate;
+xticklabel_rotate([],45,[],'Fontsize',14);
 
 
 
