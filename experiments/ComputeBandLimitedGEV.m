@@ -3,15 +3,15 @@ clear;
 % load data
 fileName = GetLocalDataFile();
 
-maxNumMicroStates = 15;
+maxNumMicroStates = 10;
 % bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
 % bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
-bands =       [4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
-bandLabels = {'ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
+bands =       [1,35;  1,120;          1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
+bandLabels = {'Broadband','Fullband','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
 colors = lines();
 
 load(fileName);
-%data = ConcatenateTrials(data);
+data = ConcatenateTrials(data);
 gev = zeros(size(bands,1),maxNumMicroStates);
 for bndi=1:size(bands,1)
   band = bands(bndi,:);
