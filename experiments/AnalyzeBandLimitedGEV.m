@@ -106,7 +106,7 @@ end
 
 
 
-% plot gevArea dim:bndi_rgni (grouped by region)
+%% plot gevArea dim:bndi_rgni (grouped by region)
 figure;
 bh = bar(squeeze(mean(avgOrderedGevArea,1)));
 title(sprintf('Population GEV AUC'), 'FontSize',20);
@@ -114,8 +114,9 @@ ylabel('GEV AUC', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
 xticklabel_rotate([],45,[],'Fontsize',14);
+set(gca,'XLim',[0, length(orderedBandLabels)+1]);
 hold on;
-eh = errorbar(squeeze(mean(avgOrderedGevArea,1)), std(avgOrderedGevArea,1,1), '*r');
+eh = errorbar(squeeze(mean(avgOrderedGevArea,1)), std(avgOrderedGevArea,1,1), 'r*', 'LineWidth', 2);
 
 % plot maxExVar dim:bndi_rgni (grouped by region)
 figure;
@@ -125,8 +126,9 @@ ylabel('Maximum GEV', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
 xticklabel_rotate([],45,[],'Fontsize',14);
+set(gca,'XLim',[0, length(orderedBandLabels)+1]);
 hold on;
-eh = errorbar(squeeze(mean(avgOrderedMaxExVar,1)), std(avgOrderedMaxExVar,1,1), '*r');
+eh = errorbar(squeeze(mean(avgOrderedMaxExVar,1)), std(avgOrderedMaxExVar,1,1), 'r*', 'LineWidth', 2);
 
 
 
