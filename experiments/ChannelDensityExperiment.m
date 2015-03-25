@@ -140,27 +140,27 @@ for densityFactor = 0.1:0.1:1
   
 end
 
-%%plot features vs numSensors
+%% plot features vs numSensors
 figure;
-bar(numSensors,md,'--*');
+plot(numSensors,md,'--*');
 title(' Duration vs Sensor Count');
 xlabel('Number of Sensors');
 ylabel('Mean MS Duration');
 
 figure;
-bar(numSensors,sd,'--*');
+plot(numSensors,sd,'--*');
 title(' STD Duration vs Sensor Count');
 xlabel('Number of Sensors');
 ylabel('STD MS Duration');
 
 figure;
-bar(numSensors,gr,'--*');
+plot(numSensors,gr,'--*');
 title(' GFP Peak Rate vs Sensor Count');
 xlabel('Number of Sensors');
 ylabel('GFP Peak Rate (peaks per sec)');
 
 figure;
-bar(numSensors,gs,'--*');
+plot(numSensors,gs,'--*');
 title(' STD of GFPPeak  Rate vs Sensor Count');
 xlabel('Number of Sensors');
 ylabel('STD GFP Peak Rate');
