@@ -3,10 +3,12 @@ clear;
 
 dataDir = GetLocalOutputDirectory();
 
-% bands = [];
+bands = [];
 % % for bandEnd=5:5:120;
 % %   bands(end+1,:) = [1, bandEnd];
 % % end
+
+% 10Hz increments
 % bands = [1:10:111;10:10:121]';
 % bandLabels = {};
 % for bndi=1:size(bands,1)
@@ -14,6 +16,7 @@ dataDir = GetLocalOutputDirectory();
 %   bandLabels{end+1}=sprintf('%i-%iHz',band(1),band(2));
 % end
 
+% Labeled Bands
 bands =       [1,35;  1,120;          1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
 bandLabels = {'Broadband','Fullband','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
 
@@ -40,7 +43,8 @@ experimentids = {'105923_MEG_3-Restin', ...
 '601127_MEG_3-Restin', ...
 '660951_MEG_3-Restin', ...
 '820745_MEG_3-Restin', ...
-'912447_MEG_3-Restin'};
+'912447_MEG_3-Restin'  ...
+};
 
 colors = lines(10);
 
@@ -77,15 +81,9 @@ for exprmntdi=1:length(experimentids)
     end
   end
   
-  if exprmntdi == 1
-    avgOrderedGev = orderedGev; 
-    avgOrderedGevArea = orderedGevArea;
-    avgOrderedMaxExVar = orderedMaxExVar;
-  else
-    avgOrderedGev = avgOrderedGev + orderedGev; 
-    avgOrderedGevArea = avgOrderedGevArea + orderedGevArea;
-    avgOrderedMaxExVar = avgOrderedMaxExVar + orderedMaxExVar;
-  end
+  avgOrderedGev(exprmntdi,:,:) = orderedGev; 
+  avgOrderedGevArea(exprmntdi,:) = orderedGevArea;
+  avgOrderedMaxExVar(exprmntdi,:) = orderedMaxExVar;
 
   
   % plot gev statistics 
@@ -106,28 +104,29 @@ for exprmntdi=1:length(experimentids)
 
 end
 
-avgOrderedGev = avgOrderedGev/length(bandLabels); 
-avgOrderedGevArea = avgOrderedGevArea/length(bandLabels);
-avgOrderedMaxExVar = avgOrderedMaxExVar/length(bandLabels);
 
 
 % plot gevArea dim:bndi_rgni (grouped by region)
 figure;
-bh = bar(avgOrderedGevArea(:,:)');
+bh = bar(squeeze(mean(avgOrderedGevArea,1)));
 title(sprintf('Population GEV AUC'), 'FontSize',20);
 ylabel('GEV AUC', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
 xticklabel_rotate([],45,[],'Fontsize',14);
+hold on;
+eh = errorbar(squeeze(mean(avgOrderedGevArea,1)), std(avgOrderedGevArea,1,1), '*r');
 
 % plot maxExVar dim:bndi_rgni (grouped by region)
 figure;
-bh = bar(avgOrderedMaxExVar(:,:)');
+bh = bar(squeeze(mean(avgOrderedMaxExVar,1)));
 title(sprintf('Population Maximum Explained Variance'), 'FontSize',20);
 ylabel('Maximum GEV', 'FontSize',14);
 set(gca, 'XTick', 1:length(orderedBandLabels));
 set(gca, 'XTickLabel',orderedBandLabels);
 xticklabel_rotate([],45,[],'Fontsize',14);
+hold on;
+eh = errorbar(squeeze(mean(avgOrderedMaxExVar,1)), std(avgOrderedMaxExVar,1,1), '*r');
 
 
 

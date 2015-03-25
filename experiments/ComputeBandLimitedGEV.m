@@ -6,8 +6,8 @@ fileName = GetLocalDataFile();
 maxNumMicroStates = 10;
 % bands =       [1,50;       1,120;    4,10;        35,50;     50,76;      76,120;      35,50;        50,76;         76,120];
 % bandLabels = {'Broadband','Fullband','ThetaAlpha','GammaLow','GammaMid', 'GammaHigh','EnvGammaLow','EnvGammaMid', 'EnvGammaHigh'};
-bands =       [1,35;  1,120;          1,4;    4,8;    8,15;   15,26;     26,35;     35,50;     50,76;      76,120];
-bandLabels = {'Broadband','Fullband','Delta','Theta','Alpha','BetaLow', 'BetaHigh','GammaLow','GammaMid', 'GammaHigh'};
+bands =       [1,35;  1,120;          35,50;     50,76;      76,120];
+bandLabels = {'Broadband','Fullband','GammaLow','GammaMid', 'GammaHigh'};
 colors = hsv(length(bandLabels));
 
 load(fileName);
