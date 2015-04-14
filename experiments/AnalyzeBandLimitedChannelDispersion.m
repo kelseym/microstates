@@ -34,6 +34,8 @@ experimentids = {'105923_MEG_3-Restin', ...
 '912447_MEG_3-Restin'  ...
 };
 
+% experimentids = {'114823_MEG_3-Restin'};
+
 colors = lines(10);
 
 bandLimitedCorr = zeros(length(experimentids),length(bandLabels),numMicrostates);
@@ -62,44 +64,52 @@ for exprmntdi=1:length(experimentids)
       for trli=1:length(data.microstateTemplates)
         for tmplti=1:size(data.microstateTemplates{trli},1)
           template = data.microstateTemplates{trli}(tmplti,:);
-          dispersion = data.dispersion{trli}(tmplti,:);
-          template = abs(template);
+          dispersion = zscore(data.dispersion{trli}(tmplti,:));
+          template = zscore(abs(template));
           templateCorr = corr2(template,dispersion);
-          backgroundCorr = corr2(template(randperm(length(template))),dispersion(randperm(length(dispersion))));
+          backgroundCorr = corr2(template,dispersion(randperm(length(dispersion))));
           template2DispersionCorr(tmplti,trli) = templateCorr-backgroundCorr;
         end
       end
       bandLimitedCorr(exprmntdi,bndi,:) = mean(template2DispersionCorr,2);
       
-      % Plot Template Maps
-      cfg = [];
-      cfg.layout = '4D248.mat';
-      lay = ft_prepare_layout(cfg);
-      fh1 = PlotMicrostateTemplateSet(data.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
-      colormap(jet);
+%       % Plot Template Maps
+%       cfg = [];
+%       cfg.layout = '4D248.mat';
+%       lay = ft_prepare_layout(cfg);
+%       fh1 = PlotMicrostateTemplateSet(data.microstateTemplates{1}, data.label, lay, bandLabels{bndi});
+%       colormap(jet);
+%       % save template topo plot
+%       outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Templates_NumMicrostates-%i_TrialLength-%i_Band-%s',experimentid,numMicrostates,trialLength,bandLabels{bndi})];
+%       saveas(fh1,outputFileName,'fig')
+%       saveas(fh1,outputFileName,'png')
 
-      % plot per channel dispersion
-      cfg = [];
-      cfg.layout = '4D248.mat';
-      lay = ft_prepare_layout(cfg);
-      fh2 = PlotMicrostateTemplateSet(data.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
-      colormap(cool);
+%       % plot per channel dispersion
+%       cfg = [];
+%       cfg.layout = '4D248.mat';
+%       lay = ft_prepare_layout(cfg);
+%       fh2 = PlotMicrostateTemplateSet(data.dispersion{1}, data.label, lay, [bandLabels{bndi} ' Channel Dispersion']);
+%       colormap(cool);
+%       % save template topo plot
+%       outputFileName = [outputDir filesep sprintf('%s_BandLimitedChannelDispersion_Dispersion_NumMicrostates-%i_TrialLength-%i_Band-%s',experimentid,numMicrostates,trialLength,bandLabels{bndi})];
+%       saveas(fh2,outputFileName,'fig')
+%       saveas(fh2,outputFileName,'png')
     
     end
     
-    figure;
-    bh1 = bar(squeeze(bandLimitedCorr(exprmntdi,:,:)));
-    title(sprintf('Mean Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
-    set(gca, 'XTick', 1:length(bandLabels));
-    set(gca, 'XTickLabel',bandLabels);
-    xticklabel_rotate;
-    
-    figure;
-    bh2 = bar(squeeze(mean(bandLimitedCorr(exprmntdi,:,:),3)));
-    title(sprintf('Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
-    set(gca, 'XTick', 1:length(bandLabels));
-    set(gca, 'XTickLabel',bandLabels);
-    xticklabel_rotate;
+%     figure;
+%     bh1 = bar(squeeze(bandLimitedCorr(exprmntdi,:,:)));
+%     title(sprintf('Mean Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
+%     set(gca, 'XTick', 1:length(bandLabels));
+%     set(gca, 'XTickLabel',bandLabels);
+%     xticklabel_rotate;
+%     
+%     figure;
+%     bh2 = bar(squeeze(mean(bandLimitedCorr(exprmntdi,:,:),3)));
+%     title(sprintf('Template to Dispersion Correlation - %s',experimentData{exprmntdi}.dataName));
+%     set(gca, 'XTick', 1:length(bandLabels));
+%     set(gca, 'XTickLabel',bandLabels);
+%     xticklabel_rotate;
     
     
   end
@@ -121,6 +131,9 @@ title(sprintf('Population Template to Dispersion Correlation'));
 set(gca, 'XTick', 1:length(bandLabels));
 set(gca, 'XTickLabel',bandLabels);
 xticklabel_rotate;
+hold on;
+eh = errorbar(squeeze(mean(mean(bandLimitedCorr(:,:,:),1),3)), std(mean(bandLimitedCorr, 3), 1,1) , 'r*', 'LineWidth', 2);
+
 
 
 
