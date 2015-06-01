@@ -15,7 +15,7 @@ trialLengths = [5 10:10:240];
 combinationThreshold = 1/numMicrostates;
 
 baseDir = GetLocalDataDirectory();
-fileNames = dir([baseDir '105923*.mat']);
+fileNames = dir([baseDir '106521*.mat']);
 outputDir = GetLocalOutputDirectory();
 
 % Open layout file
