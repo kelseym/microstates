@@ -8,14 +8,15 @@ plotTopo = 0;
 %subplot = @(m,n,p) subtightplot (m, n, p, [0.01 0.05], [0.1 0.01], [0.1 0.01]);
 
 freqBand = [1, 40];
-numMicrostates = 4;
-numMicrostateBins = 4;
+numMicrostates = 5;
+numMicrostateBins = numMicrostates;
 trialLengths = [5 10:10:240];
 %trialLengths = [130];
 combinationThreshold = 1/numMicrostates;
 
+subjectId = '166438_MEG';
 baseDir = GetLocalDataDirectory();
-fileNames = dir([baseDir '106521*.mat']);
+fileNames = dir([baseDir subjectId '*.mat']);
 outputDir = GetLocalOutputDirectory();
 
 % Open layout file
@@ -204,7 +205,7 @@ set(gca,'XTickLabel',trialLengths);
 legend(lgnd);
 hold off;
 
-
+save(['D:/Projects/EON/R21Dev/oHBM/2015/data/'  sprintf('%s_%iMS_BinnedStability',subjectId,numMicrostates)], 'binStability')
 
 
 
